@@ -146,6 +146,10 @@ function highlightStatusButtons() {
   document.querySelectorAll('.status-btn').forEach((btn) =>
     btn.classList.toggle('selected', btn.dataset.status === selectedStatus)
   );
+  // Tint the whole sheet with a light shade of the chosen status
+  const sheet = $('#sheet');
+  sheet.classList.remove('bg-none', 'bg-visited', 'bg-avvakta', 'bg-converted');
+  sheet.classList.add(`bg-${selectedStatus}`);
 }
 
 export function setSaveStatus(text, kind = '') {

@@ -179,6 +179,11 @@ html, body {
   overflow-y: auto;
 }
 .sheet.open { transform: translateY(0); }
+.sheet { transition: transform 0.25s ease, background 0.2s ease; }
+.sheet.bg-none { background: #f4f5f6; }
+.sheet.bg-visited { background: #e8f1fe; }
+.sheet.bg-avvakta { background: #fdf3dc; }
+.sheet.bg-converted { background: #e7f8ee; }
 .sheet-handle {
   width: 40px; height: 4px;
   border-radius: 2px;
