@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f2937" />
+  <title>Säljkartan Stockholm</title>
+  <link rel="stylesheet" href="/vendor/leaflet.css" />
+  <link rel="stylesheet" href="/css/app.css" />
+</head>
+<body>
+  <!-- Password gate -->
+  <div id="gate" class="gate hidden">
+    <form id="gate-form" class="gate-card">
+      <h1>Säljkartan</h1>
+      <p>Ange lösenordet för att öppna kartan.</p>
+      <input id="gate-password" type="password" placeholder="Lösenord" autocomplete="current-password" required />
+      <button type="submit">Öppna kartan</button>
+      <p id="gate-error" class="gate-error hidden">Fel lösenord, försök igen.</p>
+    </form>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="app hidden">
+    <header class="topbar">
+      <div class="search-row">
+        <input id="search" type="search" placeholder="Sök namn eller adress…" autocomplete="off" />
+        <button id="refresh" class="icon-btn" title="Uppdatera" aria-label="Uppdatera">&#x21bb;</button>
+      </div>
+      <div id="search-results" class="search-results hidden"></div>
+      <div class="chips" id="chips">
+        <button class="chip active" data-filter="all">Alla <span></span></button>
+        <button class="chip" data-filter="none">Ej besökt <span></span></button>
+        <button class="chip" data-filter="visited">Besökt <span></span></button>
+        <button class="chip" data-filter="converted">Kund <span></span></button>
+      </div>
+    </header>
+
+    <div id="map"></div>
+
+    <button id="locate" class="locate-btn" title="Visa min position" aria-label="Visa min position">&#x25C9;</button>
+
+    <!-- Bottom sheet -->
+    <div id="sheet" class="sheet">
+      <div class="sheet-handle"></div>
+      <button id="sheet-close" class="sheet-close" aria-label="Stäng">&times;</button>
+      <h2 id="sheet-name"></h2>
+      <p id="sheet-address" class="muted"></p>
+      <p id="sheet-meta" class="meta"></p>
+      <p id="sheet-inspection" class="inspection"></p>
+      <p id="sheet-contact" class="contact"></p>
+      <div class="status-buttons">
+        <button data-status="none" class="status-btn st-none">Ej besökt</button>
+        <button data-status="visited" class="status-btn st-visited">Besökt</button>
+        <button data-status="converted" class="status-btn st-converted">Kund!</button>
+      </div>
+      <textarea id="sheet-notes" placeholder="Anteckningar… (vem du pratade med, nästa steg)" rows="3" maxlength="2000"></textarea>
+      <div class="sheet-actions">
+        <button id="sheet-save" class="save-btn">Spara</button>
+        <span id="save-status" class="save-status"></span>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="/vendor/leaflet.js"></script>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
