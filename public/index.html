@@ -54,6 +54,15 @@
         <button data-status="visited" class="status-btn st-visited">Besökt</button>
         <button data-status="converted" class="status-btn st-converted">Kund!</button>
       </div>
+      <div class="date-row">
+        <label>Besökt den
+          <input id="sheet-visited" type="date" />
+        </label>
+        <label>Återkom den
+          <input id="sheet-comeback" type="date" />
+        </label>
+      </div>
+      <input id="sheet-tools" type="text" placeholder="SaaS-verktyg de använder idag (valfritt)" maxlength="300" />
       <textarea id="sheet-notes" placeholder="Anteckningar… (vem du pratade med, nästa steg)" rows="3" maxlength="2000"></textarea>
       <div class="sheet-actions">
         <button id="sheet-save" class="save-btn">Spara</button>

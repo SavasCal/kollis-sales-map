@@ -79,22 +79,23 @@ async function refreshState() {
   }
 }
 
-async function handleSave({ id, s, n }) {
+async function handleSave(payload) {
+  const { id, s, n, v, c, tools } = payload;
   // Optimistic: recolor immediately, then persist
-  if (s === 'none' && !n) delete overrides[id];
-  else overrides[id] = { s: s === 'none' ? undefined : s, n, t: new Date().toISOString() };
+  if (s === 'none' && !n && !v && !c && !tools) delete overrides[id];
+  else overrides[id] = { s: s === 'none' ? undefined : s, n, v, c, tools, t: new Date().toISOString() };
   mapView.updateMarker(id);
   ui.updateCounts(overrides, facilities.length);
   ui.setSaveStatus('Sparar…');
 
   try {
-    const data = await api.saveOverride({ id, s, n });
+    const data = await api.saveOverride(payload);
     applyOverrides(data.overrides);
     ui.setSaveStatus('Sparat ✓', 'ok');
     api.flushQueue(applyOverrides);
   } catch (err) {
     if (err.message === 'unauthorized') return;
-    api.enqueueSave({ id, s, n });
+    api.enqueueSave(payload);
     ui.setSaveStatus('Kunde inte spara — sparas när du är online igen', 'err');
     ui.toast(`${api.pendingCount()} ändring(ar) väntar på att skickas`);
   }

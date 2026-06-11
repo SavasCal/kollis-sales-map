@@ -22,7 +22,14 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
   );
   $('#sheet-save').addEventListener('click', () => {
     if (!currentFacility) return;
-    onSave({ id: currentFacility.id, s: selectedStatus, n: $('#sheet-notes').value.trim() });
+    onSave({
+      id: currentFacility.id,
+      s: selectedStatus,
+      n: $('#sheet-notes').value.trim(),
+      v: $('#sheet-visited').value,
+      c: $('#sheet-comeback').value,
+      tools: $('#sheet-tools').value.trim(),
+    });
   });
 
   // Search
@@ -99,6 +106,9 @@ export function openSheet(facility) {
   $('#sheet-contact').innerHTML = contact.join(' · ');
 
   $('#sheet-notes').value = override?.n || '';
+  $('#sheet-visited').value = override?.v || '';
+  $('#sheet-comeback').value = override?.c || '';
+  $('#sheet-tools').value = override?.tools || '';
   setSaveStatus('');
   highlightStatusButtons();
   $('#sheet').classList.add('open');
@@ -113,6 +123,11 @@ export const getOpenFacilityId = () => currentFacility?.id || null;
 
 function selectStatus(status) {
   selectedStatus = status;
+  // First time a place is marked visited/converted, stamp today's date (local time)
+  const visitedInput = $('#sheet-visited');
+  if (status !== 'none' && !visitedInput.value) {
+    visitedInput.value = new Intl.DateTimeFormat('sv-SE').format(new Date());
+  }
   highlightStatusButtons();
 }
 

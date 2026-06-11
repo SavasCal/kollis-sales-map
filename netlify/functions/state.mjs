@@ -58,8 +58,15 @@ export default async (req) => {
       } catch {
         return json(400, { ok: false, error: 'invalid json' });
       }
-      const { id, s = 'none', n = '' } = body || {};
-      if (!UUID_RE.test(id || '') || !STATUSES.has(s) || typeof n !== 'string' || n.length > 2000) {
+      const { id, s = 'none', n = '', v = '', c = '', tools = '' } = body || {};
+      const DATE_RE = /^(\d{4}-\d{2}-\d{2})?$/;
+      if (
+        !UUID_RE.test(id || '') || !STATUSES.has(s) ||
+        typeof n !== 'string' || n.length > 2000 ||
+        typeof v !== 'string' || !DATE_RE.test(v) ||
+        typeof c !== 'string' || !DATE_RE.test(c) ||
+        typeof tools !== 'string' || tools.length > 300
+      ) {
         return json(400, { ok: false, error: 'invalid payload' });
       }
 
@@ -67,12 +74,16 @@ export default async (req) => {
       // JSONBin PUT replaces the entire bin contents.
       const record = await fetchOverrides(binId, masterKey);
       const note = n.trim();
-      if (s === 'none' && !note) {
+      const toolsUsed = tools.trim();
+      if (s === 'none' && !note && !v && !c && !toolsUsed) {
         delete record[id];
       } else {
         const entry = { t: new Date().toISOString() };
         if (s !== 'none') entry.s = s;
         if (note) entry.n = note;
+        if (v) entry.v = v; // visited date
+        if (c) entry.c = c; // come-back date
+        if (toolsUsed) entry.tools = toolsUsed;
         record[id] = entry;
       }
       if (!record._meta) record._meta = { v: 1 };

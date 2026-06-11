@@ -27,7 +27,7 @@ async function request(method, body) {
 }
 
 export const getState = () => request('GET');
-export const saveOverride = ({ id, s, n }) => request('POST', { id, s, n });
+export const saveOverride = (payload) => request('POST', payload);
 
 // ---- Pending-save queue (survives reloads; last write wins per facility) ----
 
