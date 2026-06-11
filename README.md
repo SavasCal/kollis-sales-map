@@ -54,8 +54,10 @@ Done. Open the site on your phones, enter the password, start knocking on doors.
 
 ## Google Sheet sync (optional)
 
-Every save can also be mirrored to a Google Sheet — one row per facility
-(name, address, status, dates, tools, note) in a "Status" tab.
+Every save can also be mirrored to a Google Sheet, into two tabs:
+**"Status"** — current state, one row per facility (upserted), and
+**"Logg"** — append-only history where every change adds a row (backup;
+nothing is ever overwritten).
 
 1. Open your spreadsheet → Extensions → Apps Script → paste
    `google-apps-script/Code.gs` → save.
