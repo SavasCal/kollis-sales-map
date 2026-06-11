@@ -12,10 +12,20 @@ let accuracyCircle = null;
 let watching = false;
 let watchId = null;
 
+// Bigger dots the closer you zoom — easier to hit with a thumb
+function radiusForZoom(z) {
+  if (z >= 17) return 13;
+  if (z >= 16) return 11;
+  if (z >= 15) return 9;
+  if (z >= 14) return 8;
+  return 7;
+}
+let currentRadius = 7;
+
 function dotStyle(facility, status) {
   const warn = facility.r === 'Med avvikelser';
   return {
-    radius: 7,
+    radius: currentRadius,
     fillColor: COLORS[status] || COLORS.none,
     fillOpacity: 0.92,
     color: warn ? WARN_OUTLINE : '#ffffff',
@@ -55,6 +65,14 @@ export function initMap(facilities, statusGetter, onTap, onMapTap) {
   // Tapping empty map closes the sheet — but not right after a marker tap
   map.on('click', () => {
     if (Date.now() > suppressMapTapUntil) onMapTap?.();
+  });
+
+  currentRadius = radiusForZoom(map.getZoom());
+  map.on('zoomend', () => {
+    const r = radiusForZoom(map.getZoom());
+    if (r === currentRadius) return;
+    currentRadius = r;
+    for (const marker of markersById.values()) marker.setRadius(r);
   });
 
   L.control.zoom({ position: 'bottomleft' }).addTo(map);
