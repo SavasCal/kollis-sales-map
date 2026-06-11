@@ -3,11 +3,23 @@
 import { createServer } from 'node:http';
 
 let record = { _meta: { v: 1 } };
+let sheetRows = [];
 
 createServer((req, res) => {
   const chunks = [];
   req.on('data', (c) => chunks.push(c));
   req.on('end', () => {
+    // Emulates the Google Apps Script webhook (no auth, like the real one)
+    if (req.url.startsWith('/sheet')) {
+      if (req.method === 'POST') {
+        const body = JSON.parse(Buffer.concat(chunks).toString());
+        sheetRows.push(...(Array.isArray(body) ? body : [body]));
+        console.log('sheet webhook received:', JSON.stringify(body));
+      }
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, rows: sheetRows }));
+      return;
+    }
     if (req.headers['x-master-key'] !== 'test-master-key') {
       res.writeHead(401).end('{"message":"bad key"}');
       return;

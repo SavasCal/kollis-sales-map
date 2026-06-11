@@ -29,6 +29,10 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
       v: $('#sheet-visited').value,
       c: $('#sheet-comeback').value,
       tools: $('#sheet-tools').value.trim(),
+      // facility info rides along so the Google Sheet rows are readable
+      fn: currentFacility.n,
+      fa: currentFacility.a,
+      fb: currentFacility.b,
     });
   });
 

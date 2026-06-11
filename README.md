@@ -52,6 +52,26 @@ netlify deploy --prod
 
 Done. Open the site on your phones, enter the password, start knocking on doors.
 
+## Google Sheet sync (optional)
+
+Every save can also be mirrored to a Google Sheet — one row per facility
+(name, address, status, dates, tools, note) in a "Status" tab.
+
+1. Open your spreadsheet → Extensions → Apps Script → paste
+   `google-apps-script/Code.gs` → save.
+2. Deploy → New deployment → Web app → Execute as **Me**, access **Anyone**
+   → copy the web app URL.
+3. Add env var `GSHEET_WEBHOOK_URL=<that URL>` in Netlify (and `.env` locally).
+
+To push everything already saved in the bin into the sheet once:
+
+```bash
+node --env-file=.env scripts/backfill-sheet.mjs
+```
+
+If the env var is unset the app works exactly as before; webhook failures
+never block a save (JSONBin stays the source of truth).
+
 ## How sharing works
 
 - Both phones use the same password and the same bin.

@@ -38,6 +38,23 @@ function publicView(record) {
   return overrides;
 }
 
+// Mirror the change to a Google Sheet via Apps Script webhook (optional, non-fatal)
+async function forwardToSheet(entry) {
+  const url = process.env.GSHEET_WEBHOOK_URL;
+  if (!url) return;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+      redirect: 'follow', // Apps Script answers via a 302 to googleusercontent.com
+    });
+    if (!res.ok) console.error('sheet webhook http', res.status);
+  } catch (err) {
+    console.error('sheet webhook failed:', err.message);
+  }
+}
+
 export default async (req) => {
   if (!passwordOk(req)) return json(401, { ok: false, error: 'unauthorized' });
 
@@ -58,14 +75,16 @@ export default async (req) => {
       } catch {
         return json(400, { ok: false, error: 'invalid json' });
       }
-      const { id, s = 'none', n = '', v = '', c = '', tools = '' } = body || {};
+      // fn/fa/fb = facility name/address/business type, only forwarded to the sheet
+      const { id, s = 'none', n = '', v = '', c = '', tools = '', fn = '', fa = '', fb = '' } = body || {};
       const DATE_RE = /^(\d{4}-\d{2}-\d{2})?$/;
+      const shortStr = (x) => typeof x === 'string' && x.length <= 300;
       if (
         !UUID_RE.test(id || '') || !STATUSES.has(s) ||
         typeof n !== 'string' || n.length > 2000 ||
         typeof v !== 'string' || !DATE_RE.test(v) ||
         typeof c !== 'string' || !DATE_RE.test(c) ||
-        typeof tools !== 'string' || tools.length > 300
+        !shortStr(tools) || !shortStr(fn) || !shortStr(fa) || !shortStr(fb)
       ) {
         return json(400, { ok: false, error: 'invalid payload' });
       }
@@ -94,6 +113,19 @@ export default async (req) => {
         body: JSON.stringify(record),
       });
       if (!putRes.ok) throw new Error(`jsonbin PUT ${putRes.status}`);
+
+      await forwardToSheet({
+        id,
+        name: fn,
+        address: fa,
+        business: fb,
+        status: s === 'none' ? '' : s,
+        visited: v,
+        comeback: c,
+        tools: toolsUsed,
+        note,
+        updated: new Date().toISOString(),
+      });
 
       return json(200, { ok: true, overrides: publicView(record) });
     }
