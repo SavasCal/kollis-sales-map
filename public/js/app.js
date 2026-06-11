@@ -47,7 +47,7 @@ async function boot() {
 
   if (!booted) {
     booted = true;
-    mapView.initMap(facilities, getStatus, ui.openSheet);
+    mapView.initMap(facilities, getStatus, ui.openSheet, ui.closeSheet);
     ui.initUI(facilities, getOverride, handleSave, {
       onFilter: mapView.setFilter,
       onFocus: mapView.focusFacility,

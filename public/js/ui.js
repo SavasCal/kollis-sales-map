@@ -50,6 +50,12 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
     openSheet(facility);
   });
 
+  // Touching the map dismisses the search dropdown and the keyboard
+  $('#map').addEventListener('pointerdown', () => {
+    hideSearch();
+    searchInput.blur();
+  }, { passive: true });
+
   // Filter chips
   $('#chips').addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');

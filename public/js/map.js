@@ -23,13 +23,39 @@ function dotStyle(facility, status) {
   };
 }
 
-export function initMap(facilities, statusGetter, onTap) {
+const VIEW_KEY = 'salesmap_view';
+let suppressMapTapUntil = 0;
+
+export function initMap(facilities, statusGetter, onTap, onMapTap) {
   getStatus = statusGetter;
   map = L.map('map', {
     preferCanvas: true,
     renderer: L.canvas({ tolerance: 12 }),
     zoomControl: false,
-  }).setView([59.33, 18.06], 12);
+  });
+
+  // Start where you left off; otherwise zoomed in on the city, then snap to GPS
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(VIEW_KEY)); } catch { /* ignore */ }
+  if (saved?.c && saved?.z) {
+    map.setView(saved.c, saved.z);
+  } else {
+    map.setView([59.331, 18.062], 15);
+    navigator.geolocation?.getCurrentPosition(
+      (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 16),
+      () => {},
+      { timeout: 5000, maximumAge: 60000 }
+    );
+  }
+  map.on('moveend', () => {
+    const c = map.getCenter();
+    localStorage.setItem(VIEW_KEY, JSON.stringify({ c: [c.lat, c.lng], z: map.getZoom() }));
+  });
+
+  // Tapping empty map closes the sheet — but not right after a marker tap
+  map.on('click', () => {
+    if (Date.now() > suppressMapTapUntil) onMapTap?.();
+  });
 
   L.control.zoom({ position: 'bottomleft' }).addTo(map);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -39,7 +65,10 @@ export function initMap(facilities, statusGetter, onTap) {
 
   for (const f of facilities) {
     const marker = L.circleMarker([f.la, f.lo], dotStyle(f, getStatus(f.id)));
-    marker.on('click', () => onTap(f));
+    marker.on('click', () => {
+      suppressMapTapUntil = Date.now() + 150;
+      onTap(f);
+    });
     marker._facility = f;
     marker.addTo(map);
     markersById.set(f.id, marker);
