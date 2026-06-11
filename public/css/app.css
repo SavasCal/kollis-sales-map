@@ -1,6 +1,7 @@
 :root {
   --grey: #9ca3af;
   --yellow: #f59e0b;
+  --blue: #3b82f6;
   --green: #22c55e;
   --dark: #1f2937;
   --accent: #6d28d9;
@@ -216,8 +217,8 @@ html, body {
 .status-buttons { display: flex; gap: 8px; margin: 6px 0 10px; }
 .status-btn {
   flex: 1;
-  padding: 12px 4px;
-  font-size: 14px;
+  padding: 12px 2px;
+  font-size: 13px;
   font-weight: 600;
   border-radius: 10px;
   border: 2px solid #e5e7eb;
@@ -226,7 +227,8 @@ html, body {
   cursor: pointer;
 }
 .status-btn.st-none.selected { border-color: var(--grey); background: var(--grey); color: #fff; }
-.status-btn.st-visited.selected { border-color: var(--yellow); background: var(--yellow); color: #fff; }
+.status-btn.st-visited.selected { border-color: var(--blue); background: var(--blue); color: #fff; }
+.status-btn.st-avvakta.selected { border-color: var(--yellow); background: var(--yellow); color: #fff; }
 .status-btn.st-converted.selected { border-color: var(--green); background: var(--green); color: #fff; }
 
 .date-row {

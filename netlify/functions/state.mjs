@@ -5,7 +5,7 @@ import { timingSafeEqual } from 'node:crypto';
 
 const JSONBIN_BASE = process.env.JSONBIN_BASE || 'https://api.jsonbin.io/v3/b';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const STATUSES = new Set(['none', 'visited', 'converted']);
+const STATUSES = new Set(['none', 'visited', 'avvakta', 'converted']);
 
 const json = (status, body) =>
   new Response(JSON.stringify(body), {

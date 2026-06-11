@@ -4,7 +4,8 @@ Password-gated field sales map for two people. 1,402 Stockholm food facilities
 (from Livsmedelskollen data) as colored dots:
 
 - **Grey** — not visited
-- **Yellow** — visited / in progress
+- **Blue** — visited / in progress
+- **Yellow** — avvakta (hold off: not in target group right now, hotels etc.)
 - **Green** — converted customer
 - **Red outline** — "Med avvikelser" at last inspection (a sales opening)
 

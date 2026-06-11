@@ -1,6 +1,6 @@
 // Leaflet map: canvas dot per facility, status colors, filtering, locate-me.
 
-const COLORS = { none: '#9ca3af', visited: '#f59e0b', converted: '#22c55e' };
+const COLORS = { none: '#9ca3af', visited: '#3b82f6', avvakta: '#f59e0b', converted: '#22c55e' };
 const WARN_OUTLINE = '#dc2626'; // "Med avvikelser" — inspection issues, a sales opening
 
 let map;

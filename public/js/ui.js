@@ -1,6 +1,6 @@
 // UI: bottom sheet, search, filter chips with counts, toasts.
 
-const COLORS = { none: '#9ca3af', visited: '#f59e0b', converted: '#22c55e' };
+const COLORS = { none: '#9ca3af', visited: '#3b82f6', avvakta: '#f59e0b', converted: '#22c55e' };
 const $ = (sel) => document.querySelector(sel);
 
 let currentFacility = null;
@@ -123,9 +123,10 @@ export const getOpenFacilityId = () => currentFacility?.id || null;
 
 function selectStatus(status) {
   selectedStatus = status;
-  // First time a place is marked visited/converted, stamp today's date (local time)
+  // First time a place is marked visited/converted, stamp today's date (local time).
+  // Avvakta doesn't imply a visit, so it doesn't auto-stamp.
   const visitedInput = $('#sheet-visited');
-  if (status !== 'none' && !visitedInput.value) {
+  if ((status === 'visited' || status === 'converted') && !visitedInput.value) {
     visitedInput.value = new Intl.DateTimeFormat('sv-SE').format(new Date());
   }
   highlightStatusButtons();
@@ -145,12 +146,14 @@ export function setSaveStatus(text, kind = '') {
 
 export function updateCounts(overrides, total) {
   let visited = 0;
+  let avvakta = 0;
   let converted = 0;
   for (const o of Object.values(overrides)) {
     if (o.s === 'visited') visited++;
+    else if (o.s === 'avvakta') avvakta++;
     else if (o.s === 'converted') converted++;
   }
-  const counts = { all: total, none: total - visited - converted, visited, converted };
+  const counts = { all: total, none: total - visited - avvakta - converted, visited, avvakta, converted };
   document.querySelectorAll('.chip').forEach((chip) => {
     chip.querySelector('span').textContent = `(${counts[chip.dataset.filter]})`;
   });
