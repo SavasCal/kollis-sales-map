@@ -64,17 +64,20 @@ Done. Open the site on your phones, enter the password, start knocking on doors.
 
 ## Refreshing facility data
 
-When the source CSVs are re-scraped
-(`/Users/savascal/Desktop/kollis-growth-hack/021_livsmedelskollen/out/`):
-
 ```bash
-npm install        # first time only
-npm run data       # regenerates public/data/facilities.json
+yarn install       # first time only
+yarn fetch         # sweeps the Stockholm API -> data-src/all-facilities.json (~1 min)
+yarn data          # regenerates public/data/facilities.json
 ```
 
 Then redeploy. Statuses are keyed by facility UUID, so existing progress survives.
-The script drops ~98 facilities with no coordinates (food trucks, ships) and
-verifies the coordinate conversion against a known landmark.
+
+The Stockholm API caps every response at 1,500 rows, so `yarn fetch` sweeps the
+municipality with area queries (splitting any capped cell in four) and dedupes —
+~8,500 facilities as of June 2026. `yarn data` drops ~97 facilities with no
+coordinates (food trucks, ships), converts SWEREF99 → WGS84, and verifies the
+conversion against a known landmark. Email/website enrichment still merges from
+`/Users/savascal/Desktop/kollis-growth-hack/021_livsmedelskollen/out/enriched_facilities.csv`.
 
 ## Local development
 
