@@ -78,9 +78,12 @@ verifies the coordinate conversion against a known landmark.
 ## Local development
 
 ```bash
-node scripts/mock-jsonbin.mjs &              # fake JSONBin on :9999
-node --env-file=.env scripts/dev-server.mjs  # app + function on :8888
+yarn dev    # app + function on :8888, mock JSONBin on :9999
 ```
+
+Open http://localhost:8888 — password `testpass`. The mock JSONBin only starts
+when `JSONBIN_BASE` in `.env` points at localhost; point `.env` at your real
+bin (and remove `JSONBIN_BASE`) to test against production data.
 
 `.env` (gitignored) for local dev:
 
