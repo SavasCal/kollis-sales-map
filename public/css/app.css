@@ -164,6 +164,90 @@ html, body {
 }
 .locate-btn.active { background: var(--accent); color: #fff; }
 
+/* ---------- Kanban toggle + board ---------- */
+.kanban-btn {
+  position: fixed;
+  top: calc(8px + env(safe-area-inset-top));
+  right: 12px;
+  z-index: 1200;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background: var(--danger);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+.kanban-btn.active { background: #fff; color: var(--danger); }
+
+.kanban {
+  flex: 1;
+  z-index: 1;
+  background: #f3f4f6;
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.kanban-col {
+  flex: 0 0 78vw;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.kanban-col-header {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark);
+  padding: 10px 12px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.kanban-col-header span { font-weight: 600; opacity: 0.65; }
+.kanban-col-header.bg-visited { background: #e8f1fe; }
+.kanban-col-header.bg-avvakta { background: #fdf3dc; }
+.kanban-col-header.bg-converted { background: #e7f8ee; }
+.kanban-col-header.bg-övrigt { background: #f4f5f6; }
+.kanban-cards {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background: #fff;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.kanban-empty { color: #9ca3af; font-size: 13px; text-align: center; margin: 12px 0; }
+.kanban-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-radius: 8px;
+  background: #f9fafb;
+  padding: 10px 12px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.kanban-name { display: block; font-size: 15px; font-weight: 600; color: var(--dark); }
+.kanban-addr { display: block; font-size: 12px; color: #6b7280; margin-top: 2px; }
+.kanban-note {
+  font-size: 13px;
+  color: #374151;
+  margin: 6px 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.kanban-dates { font-size: 12px; color: #6b7280; margin: 6px 0 0; }
+
 /* ---------- Bottom sheet ---------- */
 .sheet {
   position: fixed;

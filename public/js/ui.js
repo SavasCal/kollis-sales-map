@@ -7,12 +7,17 @@ let currentFacility = null;
 let selectedStatus = 'none';
 let onSave = () => {};
 let getOverride = () => null;
+let getOverrides = () => ({});
 let allFacilities = [];
+let facilityById = new Map();
 let searchIndex = [];
+let kanbanOpen = false;
 
-export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFocus }) {
+export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFocus, getOverrides: overridesGetter }) {
   allFacilities = facilities;
+  facilityById = new Map(facilities.map((f) => [f.id, f]));
   getOverride = overrideGetter;
+  getOverrides = overridesGetter;
   onSave = saveHandler;
   searchIndex = facilities.map((f) => ({ f, text: `${f.n} ${f.a}`.toLowerCase() }));
 
@@ -66,6 +71,14 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
     if (!chip) return;
     document.querySelectorAll('.chip').forEach((c) => c.classList.toggle('active', c === chip));
     onFilter(chip.dataset.filter);
+  });
+
+  // Kanban card -> open the editor in place over the board
+  $('#kanban').addEventListener('click', (e) => {
+    const card = e.target.closest('.kanban-card');
+    if (!card) return;
+    const facility = facilityById.get(card.dataset.id);
+    if (facility) openSheet(facility);
   });
 }
 
@@ -130,6 +143,71 @@ export function closeSheet() {
 }
 
 export const getOpenFacilityId = () => currentFacility?.id || null;
+
+// --- Kanban board: only touched places (those present in overrides) ---
+
+const KANBAN_COLS = [
+  { key: 'visited', label: 'Besökt' },
+  { key: 'avvakta', label: 'Avvakta' },
+  { key: 'converted', label: 'Kund' },
+];
+
+export function toggleKanban() {
+  kanbanOpen = !kanbanOpen;
+  $('#map').classList.toggle('hidden', kanbanOpen);
+  $('#kanban').classList.toggle('hidden', !kanbanOpen);
+  const btn = $('#kanban-toggle');
+  btn.classList.toggle('active', kanbanOpen);
+  btn.title = kanbanOpen ? 'Visa karta' : 'Visa kanban';
+  btn.setAttribute('aria-label', kanbanOpen ? 'Visa karta' : 'Visa kanban');
+  if (kanbanOpen) renderKanban();
+}
+
+export function refreshKanbanIfOpen() {
+  if (kanbanOpen) renderKanban();
+}
+
+function renderKanban() {
+  // Bucket every touched place by status; unknown/missing status -> "övrigt".
+  const buckets = { visited: [], avvakta: [], converted: [], övrigt: [] };
+  for (const [id, o] of Object.entries(getOverrides())) {
+    const facility = facilityById.get(id);
+    if (!facility) continue;
+    const key = buckets[o?.s] ? o.s : 'övrigt';
+    buckets[key].push({ facility, o });
+  }
+  for (const list of Object.values(buckets)) {
+    list.sort((a, b) => (b.o?.t || '').localeCompare(a.o?.t || ''));
+  }
+
+  const cols = [...KANBAN_COLS];
+  if (buckets.övrigt.length) cols.push({ key: 'övrigt', label: 'Övrigt' });
+
+  $('#kanban').innerHTML = cols
+    .map((col) => {
+      const items = buckets[col.key];
+      const cards = items.map(({ facility, o }) => renderCard(facility, o, col.key)).join('') ||
+        '<p class="kanban-empty">Inga ännu</p>';
+      return `<section class="kanban-col">
+        <header class="kanban-col-header bg-${col.key}">${escapeHtml(col.label)} <span>(${items.length})</span></header>
+        <div class="kanban-cards">${cards}</div>
+      </section>`;
+    })
+    .join('');
+}
+
+function renderCard(facility, o, statusKey) {
+  const note = o?.n ? `<p class="kanban-note">${escapeHtml(o.n)}</p>` : '';
+  const dates = [];
+  if (o?.v) dates.push(`Besökt ${escapeHtml(o.v)}`);
+  if (o?.c) dates.push(`Återkom ${escapeHtml(o.c)}`);
+  const dateRow = dates.length ? `<p class="kanban-dates">${dates.join(' · ')}</p>` : '';
+  return `<button class="kanban-card st-${statusKey}" data-id="${escapeHtml(facility.id)}">
+    <span class="kanban-name">${escapeHtml(facility.n)}</span>
+    <span class="kanban-addr">${escapeHtml(facility.a)} · ${escapeHtml(facility.b)}</span>
+    ${note}${dateRow}
+  </button>`;
+}
 
 function selectStatus(status) {
   selectedStatus = status;

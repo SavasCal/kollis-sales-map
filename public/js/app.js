@@ -10,6 +10,7 @@ let overrides = {}; // facilityId -> {s, n, t}
 let booted = false;
 
 const getOverride = (id) => overrides[id] || null;
+const getOverrides = () => overrides;
 const getStatus = (id) => overrides[id]?.s || 'none';
 
 function showGate(withError = false) {
@@ -21,7 +22,10 @@ function showGate(withError = false) {
 function applyOverrides(next) {
   overrides = next || {};
   ui.updateCounts(overrides, facilities.length);
-  if (booted) mapView.refreshAllMarkers();
+  if (booted) {
+    mapView.refreshAllMarkers();
+    ui.refreshKanbanIfOpen();
+  }
 }
 
 async function boot() {
@@ -51,8 +55,10 @@ async function boot() {
     ui.initUI(facilities, getOverride, handleSave, {
       onFilter: mapView.setFilter,
       onFocus: mapView.focusFacility,
+      getOverrides,
     });
     $('#locate').addEventListener('click', (e) => mapView.toggleLocate(e.currentTarget));
+    $('#kanban-toggle').addEventListener('click', ui.toggleKanban);
     $('#refresh').addEventListener('click', refreshState);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
@@ -86,6 +92,7 @@ async function handleSave(payload) {
   else overrides[id] = { s: s === 'none' ? undefined : s, n, v, c, tools, t: new Date().toISOString() };
   mapView.updateMarker(id);
   ui.updateCounts(overrides, facilities.length);
+  ui.refreshKanbanIfOpen();
   ui.setSaveStatus('Sparar…');
 
   try {
