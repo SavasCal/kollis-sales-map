@@ -90,11 +90,27 @@ export default async (req) => {
       }
 
       // Read-modify-write: always merge into the latest full record before PUT —
-      // JSONBin PUT replaces the entire bin contents.
+      // JSONBin PUT replaces the entire bin contents, so a save built on a blank
+      // read would overwrite everything. Guard against that below.
       const record = await fetchOverrides(binId, masterKey);
+      // A blank/non-object read must never become the basis for a full-bin PUT.
+      if (!record || typeof record !== 'object' || Array.isArray(record)) {
+        throw new Error('jsonbin GET returned non-object');
+      }
+      const realKeys = (r) => Object.keys(r).filter((k) => k !== '_meta');
+      const beforeCount = realKeys(record).length;
+      // Every real write stamps _meta. So a read with _meta present but zero entries
+      // means the bin was blanked/reset between writes — NOT a genuine first-ever save.
+      // Building a save on that would re-seed the bin with a single entry and mask the
+      // loss. Refuse; the change is queued client-side and the bin keeps whatever it has.
+      if (beforeCount === 0 && record._meta) {
+        console.error('refused save onto blanked bin (had _meta, zero entries)');
+        return json(409, { ok: false, error: 'bin-blank-refused' });
+      }
       const note = n.trim();
       const toolsUsed = tools.trim();
-      if (s === 'none' && !note && !v && !c && !toolsUsed) {
+      const isDelete = s === 'none' && !note && !v && !c && !toolsUsed;
+      if (isDelete) {
         delete record[id];
       } else {
         const entry = { t: new Date().toISOString() };
@@ -106,6 +122,19 @@ export default async (req) => {
         record[id] = entry;
       }
       if (!record._meta) record._meta = { v: 1 };
+
+      // Safety net: one save may touch exactly one facility. If the record would
+      // shrink by more than the single delete (or shrink at all on an add/update),
+      // the read was almost certainly blank/partial — refuse rather than wipe the bin.
+      const afterCount = realKeys(record).length;
+      const okDelta = isDelete
+        ? afterCount === beforeCount || afterCount === beforeCount - 1
+        : afterCount === beforeCount || afterCount === beforeCount + 1;
+      const wipesAll = afterCount === 0 && beforeCount > 1;
+      if (!okDelta || wipesAll) {
+        console.error(`refused bulk change: before=${beforeCount} after=${afterCount} delete=${isDelete}`);
+        return json(409, { ok: false, error: 'refused-bulk-change' });
+      }
 
       const putRes = await fetch(`${JSONBIN_BASE}/${binId}`, {
         method: 'PUT',
