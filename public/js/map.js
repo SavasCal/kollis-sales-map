@@ -11,6 +11,9 @@ let userMarker = null;
 let accuracyCircle = null;
 let watching = false;
 let watchId = null;
+let hereRing = null;       // red 2x ring drawn around the facility you're standing on
+let hereFacilityId = null; // which facility the ring is currently on
+const HERE_RADIUS_M = 35;  // how close (metres) counts as "on" a location
 
 // Bigger dots the closer you zoom — easier to hit with a thumb
 function radiusForZoom(z) {
@@ -73,6 +76,7 @@ export function initMap(facilities, statusGetter, onTap, onMapTap) {
     if (r === currentRadius) return;
     currentRadius = r;
     for (const marker of markersById.values()) marker.setRadius(r);
+    hereRing?.setRadius(r * 2);
   });
 
   L.control.zoom({ position: 'bottomleft' }).addTo(map);
@@ -123,6 +127,33 @@ export function focusFacility(facility) {
   map.setView([facility.la, facility.lo], Math.max(map.getZoom(), 17));
 }
 
+// Ring the facility you're physically at with a doubled red circle.
+function highlightHere(ll) {
+  let nearest = null;
+  let nearestDist = Infinity;
+  for (const marker of markersById.values()) {
+    const d = map.distance(ll, marker.getLatLng());
+    if (d < nearestDist) { nearestDist = d; nearest = marker; }
+  }
+  if (!nearest || nearestDist > HERE_RADIUS_M) {
+    if (hereRing) { hereRing.remove(); hereRing = null; hereFacilityId = null; }
+    return;
+  }
+  if (hereFacilityId === nearest._facility.id) {
+    hereRing.setLatLng(nearest.getLatLng());
+    return;
+  }
+  hereRing?.remove();
+  hereFacilityId = nearest._facility.id;
+  hereRing = L.circleMarker(nearest.getLatLng(), {
+    radius: currentRadius * 2,
+    fill: false,
+    color: WARN_OUTLINE,
+    weight: 3,
+  }).addTo(map);
+  hereRing.bringToFront();
+}
+
 export function toggleLocate(button) {
   if (watching) {
     navigator.geolocation.clearWatch(watchId);
@@ -130,7 +161,9 @@ export function toggleLocate(button) {
     button.classList.remove('active');
     userMarker?.remove();
     accuracyCircle?.remove();
-    userMarker = accuracyCircle = null;
+    hereRing?.remove();
+    userMarker = accuracyCircle = hereRing = null;
+    hereFacilityId = null;
     return;
   }
   if (!navigator.geolocation) return;
@@ -151,6 +184,7 @@ export function toggleLocate(button) {
         userMarker.setLatLng(ll);
         accuracyCircle.setLatLng(ll).setRadius(pos.coords.accuracy);
       }
+      highlightHere(ll);
       if (firstFix) {
         map.setView(ll, Math.max(map.getZoom(), 15));
         firstFix = false;

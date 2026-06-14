@@ -22,6 +22,7 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
   searchIndex = facilities.map((f) => ({ f, text: `${f.n} ${f.a}`.toLowerCase() }));
 
   $('#sheet-close').addEventListener('click', closeSheet);
+  $('#sheet-cancel').addEventListener('click', closeSheet);
   document.querySelectorAll('.status-btn').forEach((btn) =>
     btn.addEventListener('click', () => selectStatus(btn.dataset.status))
   );
@@ -129,7 +130,8 @@ export function openSheet(facility) {
   $('#sheet-contact').innerHTML = contact.join(' · ');
 
   $('#sheet-notes').value = override?.n || '';
-  $('#sheet-visited').value = override?.v || '';
+  // "Besökt den" defaults to today so you don't have to set it on every visit
+  $('#sheet-visited').value = override?.v || new Intl.DateTimeFormat('sv-SE').format(new Date());
   $('#sheet-comeback').value = override?.c || '';
   $('#sheet-tools').value = override?.tools || '';
   setSaveStatus('');
