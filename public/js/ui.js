@@ -6,6 +6,7 @@ const $ = (sel) => document.querySelector(sel);
 let currentFacility = null;
 let selectedStatus = 'none';
 let onSave = () => {};
+let onSelect = () => {};
 let getOverride = () => null;
 let getOverrides = () => ({});
 let allFacilities = [];
@@ -13,12 +14,13 @@ let facilityById = new Map();
 let searchIndex = [];
 let kanbanOpen = false;
 
-export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFocus, getOverrides: overridesGetter }) {
+export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFocus, onSelect: selectHandler, getOverrides: overridesGetter }) {
   allFacilities = facilities;
   facilityById = new Map(facilities.map((f) => [f.id, f]));
   getOverride = overrideGetter;
   getOverrides = overridesGetter;
   onSave = saveHandler;
+  onSelect = selectHandler || onSelect;
   searchIndex = facilities.map((f) => ({ f, text: `${f.n} ${f.a}`.toLowerCase() }));
 
   $('#sheet-close').addEventListener('click', closeSheet);
@@ -137,11 +139,13 @@ export function openSheet(facility) {
   setSaveStatus('');
   highlightStatusButtons();
   $('#sheet').classList.add('open');
+  onSelect(facility);
 }
 
 export function closeSheet() {
   $('#sheet').classList.remove('open');
   currentFacility = null;
+  onSelect(null);
 }
 
 export const getOpenFacilityId = () => currentFacility?.id || null;

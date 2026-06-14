@@ -55,6 +55,7 @@ async function boot() {
     ui.initUI(facilities, getOverride, handleSave, {
       onFilter: mapView.setFilter,
       onFocus: mapView.focusFacility,
+      onSelect: mapView.ringFacility,
       getOverrides,
     });
     $('#locate').addEventListener('click', (e) => mapView.toggleLocate(e.currentTarget));
