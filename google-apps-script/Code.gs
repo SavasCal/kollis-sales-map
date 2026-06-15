@@ -20,8 +20,8 @@
  */
 var STATUS_SHEET = 'Status';
 var LOG_SHEET = 'Logg';
-var STATUS_HEADERS = ['Id', 'Namn', 'Adress', 'Typ', 'Status', 'Besökt den', 'Återkom den', 'Verktyg', 'Anteckning', 'Uppdaterad'];
-var LOG_HEADERS = ['Loggad', 'Namn', 'Adress', 'Typ', 'Status', 'Besökt den', 'Återkom den', 'Verktyg', 'Anteckning', 'Id'];
+var STATUS_HEADERS = ['Id', 'Namn', 'Adress', 'Typ', 'Ägare', 'Status', 'Besökt den', 'Återkom den', 'Verktyg', 'Anteckning', 'Uppdaterad'];
+var LOG_HEADERS = ['Loggad', 'Namn', 'Adress', 'Typ', 'Ägare', 'Status', 'Besökt den', 'Återkom den', 'Verktyg', 'Anteckning', 'Id'];
 
 function doPost(e) {
   var lock = LockService.getScriptLock();
@@ -41,14 +41,14 @@ function doPost(e) {
 
       // Append-only backup log: one new row per change, never overwritten
       log.appendRow([
-        when, en.name || '', en.address || '', en.business || '',
+        when, en.name || '', en.address || '', en.business || '', en.owner || '',
         en.status || '', en.visited || '', en.comeback || '',
         en.tools || '', en.note || '', en.id,
       ]);
 
       // Current-state tab: upsert keyed by Id
       var row = [
-        en.id, en.name || '', en.address || '', en.business || '',
+        en.id, en.name || '', en.address || '', en.business || '', en.owner || '',
         en.status || '', en.visited || '', en.comeback || '',
         en.tools || '', en.note || '', when,
       ];

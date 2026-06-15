@@ -6,6 +6,7 @@ import { timingSafeEqual } from 'node:crypto';
 const JSONBIN_BASE = process.env.JSONBIN_BASE || 'https://api.jsonbin.io/v3/b';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const STATUSES = new Set(['none', 'visited', 'avvakta', 'converted']);
+const OWNERS = new Set(['', 'savas', 'baran']);
 
 const json = (status, body) =>
   new Response(JSON.stringify(body), {
@@ -76,11 +77,11 @@ export default async (req) => {
         return json(400, { ok: false, error: 'invalid json' });
       }
       // fn/fa/fb = facility name/address/business type, only forwarded to the sheet
-      const { id, s = 'none', n = '', v = '', c = '', tools = '', fn = '', fa = '', fb = '' } = body || {};
+      const { id, s = 'none', n = '', v = '', c = '', tools = '', own = '', fn = '', fa = '', fb = '' } = body || {};
       const DATE_RE = /^(\d{4}-\d{2}-\d{2})?$/;
       const shortStr = (x) => typeof x === 'string' && x.length <= 300;
       if (
-        !UUID_RE.test(id || '') || !STATUSES.has(s) ||
+        !UUID_RE.test(id || '') || !STATUSES.has(s) || !OWNERS.has(own) ||
         typeof n !== 'string' || n.length > 2000 ||
         typeof v !== 'string' || !DATE_RE.test(v) ||
         typeof c !== 'string' || !DATE_RE.test(c) ||
@@ -109,7 +110,7 @@ export default async (req) => {
       }
       const note = n.trim();
       const toolsUsed = tools.trim();
-      const isDelete = s === 'none' && !note && !v && !c && !toolsUsed;
+      const isDelete = s === 'none' && !note && !v && !c && !toolsUsed && !own;
       if (isDelete) {
         delete record[id];
       } else {
@@ -119,6 +120,7 @@ export default async (req) => {
         if (v) entry.v = v; // visited date
         if (c) entry.c = c; // come-back date
         if (toolsUsed) entry.tools = toolsUsed;
+        if (own) entry.own = own; // lead owner (savas/baran)
         record[id] = entry;
       }
       if (!record._meta) record._meta = { v: 1 };
@@ -153,6 +155,7 @@ export default async (req) => {
         comeback: c,
         tools: toolsUsed,
         note,
+        owner: own,
         updated: new Date().toISOString(),
       });
 

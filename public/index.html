@@ -44,6 +44,11 @@
     <button id="kanban-toggle" class="kanban-btn" title="Visa kanban" aria-label="Växla kanban-vy">&#9707;</button>
 
     <div id="map"></div>
+    <div id="kanban-owner-chips" class="chips kanban-owner-chips hidden">
+      <button class="chip active" data-owner="all">Alla <span></span></button>
+      <button class="chip" data-owner="savas">Savas <span></span></button>
+      <button class="chip" data-owner="baran">Baran <span></span></button>
+    </div>
     <div id="kanban" class="kanban hidden"></div>
 
     <button id="locate" class="locate-btn" title="Visa min position" aria-label="Visa min position">&#x25C9;</button>
@@ -63,6 +68,13 @@
         <button data-status="avvakta" class="status-btn st-avvakta">Avvakta</button>
         <button data-status="converted" class="status-btn st-converted">Kund!</button>
       </div>
+      <label class="owner-row">Ägare
+        <select id="sheet-owner">
+          <option value="">— Ingen ägare —</option>
+          <option value="savas">Savas</option>
+          <option value="baran">Baran</option>
+        </select>
+      </label>
       <div class="date-row">
         <label>Besökt den
           <input id="sheet-visited" type="date" />

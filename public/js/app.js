@@ -87,10 +87,10 @@ async function refreshState() {
 }
 
 async function handleSave(payload) {
-  const { id, s, n, v, c, tools } = payload;
+  const { id, s, n, v, c, tools, own } = payload;
   // Optimistic: recolor immediately, then persist
-  if (s === 'none' && !n && !v && !c && !tools) delete overrides[id];
-  else overrides[id] = { s: s === 'none' ? undefined : s, n, v, c, tools, t: new Date().toISOString() };
+  if (s === 'none' && !n && !v && !c && !tools && !own) delete overrides[id];
+  else overrides[id] = { s: s === 'none' ? undefined : s, n, v, c, tools, own, t: new Date().toISOString() };
   mapView.updateMarker(id);
   ui.updateCounts(overrides, facilities.length);
   ui.refreshKanbanIfOpen();

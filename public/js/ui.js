@@ -13,6 +13,9 @@ let allFacilities = [];
 let facilityById = new Map();
 let searchIndex = [];
 let kanbanOpen = false;
+let kanbanOwner = 'all';
+
+const OWNER_LABELS = { savas: 'Savas', baran: 'Baran' };
 
 export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFocus, onSelect: selectHandler, getOverrides: overridesGetter }) {
   allFacilities = facilities;
@@ -37,6 +40,7 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
       v: $('#sheet-visited').value,
       c: $('#sheet-comeback').value,
       tools: $('#sheet-tools').value.trim(),
+      own: $('#sheet-owner').value,
       // facility info rides along so the Google Sheet rows are readable
       fn: currentFacility.n,
       fa: currentFacility.a,
@@ -74,6 +78,17 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
     if (!chip) return;
     document.querySelectorAll('.chip').forEach((c) => c.classList.toggle('active', c === chip));
     onFilter(chip.dataset.filter);
+  });
+
+  // Kanban owner filter chips
+  $('#kanban-owner-chips').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    kanbanOwner = chip.dataset.owner;
+    document.querySelectorAll('#kanban-owner-chips .chip').forEach((c) =>
+      c.classList.toggle('active', c === chip)
+    );
+    renderKanban();
   });
 
   // Kanban card -> open the editor in place over the board
@@ -136,6 +151,7 @@ export function openSheet(facility) {
   $('#sheet-visited').value = override?.v || new Intl.DateTimeFormat('sv-SE').format(new Date());
   $('#sheet-comeback').value = override?.c || '';
   $('#sheet-tools').value = override?.tools || '';
+  $('#sheet-owner').value = override?.own || '';
   setSaveStatus('');
   highlightStatusButtons();
   $('#sheet').classList.add('open');
@@ -162,6 +178,7 @@ export function toggleKanban() {
   kanbanOpen = !kanbanOpen;
   $('#map').classList.toggle('hidden', kanbanOpen);
   $('#kanban').classList.toggle('hidden', !kanbanOpen);
+  $('#kanban-owner-chips').classList.toggle('hidden', !kanbanOpen);
   const btn = $('#kanban-toggle');
   btn.classList.toggle('active', kanbanOpen);
   btn.title = kanbanOpen ? 'Visa karta' : 'Visa kanban';
@@ -175,13 +192,21 @@ export function refreshKanbanIfOpen() {
 
 function renderKanban() {
   // Bucket every touched place by status; unknown/missing status -> "övrigt".
+  // Tally per-owner counts (over all touched places) for the filter chips.
   const buckets = { visited: [], avvakta: [], converted: [], övrigt: [] };
+  const ownerCounts = { all: 0, savas: 0, baran: 0 };
   for (const [id, o] of Object.entries(getOverrides())) {
     const facility = facilityById.get(id);
     if (!facility) continue;
+    ownerCounts.all++;
+    if (ownerCounts[o?.own] !== undefined) ownerCounts[o.own]++;
+    if (kanbanOwner !== 'all' && o?.own !== kanbanOwner) continue;
     const key = buckets[o?.s] ? o.s : 'övrigt';
     buckets[key].push({ facility, o });
   }
+  document.querySelectorAll('#kanban-owner-chips .chip').forEach((chip) => {
+    chip.querySelector('span').textContent = `(${ownerCounts[chip.dataset.owner] ?? 0})`;
+  });
   for (const list of Object.values(buckets)) {
     list.sort((a, b) => (b.o?.t || '').localeCompare(a.o?.t || ''));
   }
@@ -208,8 +233,9 @@ function renderCard(facility, o, statusKey) {
   if (o?.v) dates.push(`Besökt ${escapeHtml(o.v)}`);
   if (o?.c) dates.push(`Återkom ${escapeHtml(o.c)}`);
   const dateRow = dates.length ? `<p class="kanban-dates">${dates.join(' · ')}</p>` : '';
+  const owner = o?.own ? `<span class="kanban-owner">${escapeHtml(OWNER_LABELS[o.own] || o.own)}</span>` : '';
   return `<button class="kanban-card st-${statusKey}" data-id="${escapeHtml(facility.id)}">
-    <span class="kanban-name">${escapeHtml(facility.n)}</span>
+    <span class="kanban-name">${escapeHtml(facility.n)}${owner}</span>
     <span class="kanban-addr">${escapeHtml(facility.a)} · ${escapeHtml(facility.b)}</span>
     ${note}${dateRow}
   </button>`;
