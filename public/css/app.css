@@ -73,7 +73,8 @@ html, body {
 .topbar {
   position: relative;
   z-index: 1100;
-  background: var(--dark);
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
   padding: calc(6px + env(safe-area-inset-top)) 8px 6px;
   display: flex;
   flex-direction: column;
@@ -84,7 +85,7 @@ html, body {
   flex: 1;
   font-size: 16px;
   padding: 8px 12px;
-  border: none;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   min-width: 0;
 }
@@ -92,8 +93,8 @@ html, body {
   width: 42px;
   border: none;
   border-radius: 8px;
-  background: #374151;
-  color: #fff;
+  background: #f3f4f6;
+  color: var(--dark);
   font-size: 20px;
   cursor: pointer;
 }
@@ -133,9 +134,9 @@ html, body {
 .chips { display: flex; gap: 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .chip {
   flex-shrink: 0;
-  border: 1px solid #4b5563;
-  background: transparent;
-  color: #d1d5db;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #4b5563;
   border-radius: 999px;
   padding: 5px 10px;
   font-size: 12px;
@@ -143,7 +144,7 @@ html, body {
   white-space: nowrap;
 }
 .chip span { opacity: 0.7; }
-.chip.active { background: #fff; color: var(--dark); border-color: #fff; font-weight: 600; }
+.chip.active { background: var(--dark); color: #fff; border-color: var(--dark); font-weight: 600; }
 
 #map { flex: 1; z-index: 1; }
 
@@ -186,8 +187,8 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 1900;
-  background: var(--dark, #1f2937);
-  color: #fff;
+  background: #e5e7eb;
+  color: var(--dark);
   display: flex;
   flex-direction: column;
   padding: calc(env(safe-area-inset-top) + 8px) 0 env(safe-area-inset-bottom);
@@ -200,7 +201,7 @@ html, body {
   flex-shrink: 0;
 }
 .tasks-panel-head h2 { margin: 0; font-size: 24px; font-weight: 700; }
-.tasks-panel-head .sheet-close { position: static; color: #fff; font-size: 30px; }
+.tasks-panel-head .sheet-close { position: static; color: var(--dark); font-size: 30px; }
 .tasks-list {
   flex: 1;
   overflow-y: auto;
@@ -217,10 +218,11 @@ html, body {
   padding: 18px 16px;
   margin-bottom: 10px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   font-size: 18px;
   line-height: 1.35;
-  color: #f3f4f6;
+  color: var(--dark);
 }
 /* Empty checklist box on each open task for the "checklist" feel (read-only) */
 .task-row::before {
@@ -229,10 +231,10 @@ html, body {
   width: 24px;
   height: 24px;
   border-radius: 7px;
-  border: 2px solid rgba(255, 255, 255, 0.45);
+  border: 2px solid #cbd1d9;
 }
 .tasks-empty {
-  color: rgba(255, 255, 255, 0.6);
+  color: #6b7280;
   font-size: 16px;
   text-align: center;
   margin: 48px 0;
@@ -270,6 +272,16 @@ html, body {
   gap: 10px;
   padding: 12px 4px;
   border-bottom: 1px solid #eef0f2;
+  background: #fff;
+}
+.admin-task.dragging { opacity: 0.5; background: #f3f4f6; border-radius: 8px; }
+.admin-drag {
+  flex-shrink: 0;
+  color: #cbd1d9;
+  font-size: 18px;
+  cursor: grab;
+  padding: 0 2px;
+  touch-action: none;
 }
 .admin-task input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; }
 .admin-task .admin-task-text { flex: 1; font-size: 15px; color: var(--dark); }

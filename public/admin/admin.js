@@ -23,17 +23,61 @@ function render() {
     list.innerHTML = '<p class="admin-empty">Inga uppgifter ännu</p>';
     return;
   }
-  // Open tasks first, then done; preserve insertion order within each group.
-  const ordered = [...tasks].sort((a, b) => Number(a.done) - Number(b.done));
-  list.innerHTML = ordered
+  // Render in stored order — drag-to-reorder controls the ranking, top = highest.
+  list.innerHTML = tasks
     .map(
-      (t) => `<div class="admin-task${t.done ? ' done' : ''}" data-id="${escapeHtml(t.id)}">
+      (t) => `<div class="admin-task${t.done ? ' done' : ''}" data-id="${escapeHtml(t.id)}" draggable="true">
+        <span class="admin-drag" aria-hidden="true">&#9776;</span>
         <input type="checkbox" data-act="toggle" ${t.done ? 'checked' : ''} />
         <span class="admin-task-text">${escapeHtml(t.text)}</span>
         <button class="admin-del" data-act="delete" aria-label="Ta bort">&times;</button>
       </div>`
     )
     .join('');
+}
+
+// --- Drag to reorder (rank) ---
+let dragId = null;
+
+const listEl = $('#admin-list');
+
+listEl.addEventListener('dragstart', (e) => {
+  const row = e.target.closest('.admin-task');
+  if (!row) return;
+  dragId = row.dataset.id;
+  row.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+});
+
+listEl.addEventListener('dragend', (e) => {
+  e.target.closest('.admin-task')?.classList.remove('dragging');
+  dragId = null;
+});
+
+listEl.addEventListener('dragover', (e) => {
+  e.preventDefault(); // allow drop
+  const dragging = listEl.querySelector('.admin-task.dragging');
+  if (!dragging) return;
+  const after = rowAfter(e.clientY);
+  if (after == null) listEl.appendChild(dragging);
+  else listEl.insertBefore(dragging, after);
+});
+
+listEl.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (!dragId) return;
+  const order = [...listEl.querySelectorAll('.admin-task')].map((r) => r.dataset.id);
+  // Skip the round-trip if nothing actually moved.
+  if (order.join() !== tasks.map((t) => t.id).join()) mutate({ action: 'reorder', order });
+});
+
+// Find the row whose midpoint is just below the cursor (drop target).
+function rowAfter(y) {
+  const rows = [...listEl.querySelectorAll('.admin-task:not(.dragging)')];
+  return rows.find((row) => {
+    const box = row.getBoundingClientRect();
+    return y < box.top + box.height / 2;
+  }) || null;
 }
 
 async function load() {

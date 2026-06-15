@@ -63,7 +63,7 @@ export default async (req) => {
       } catch {
         return json(400, { ok: false, error: 'invalid json' });
       }
-      const { action, id = '', text = '' } = body || {};
+      const { action, id = '', text = '', order = [] } = body || {};
 
       // A fresh/manually-seeded bin can hold an array or junk; treat anything
       // that isn't a usable object as "empty" and start a clean record rather
@@ -84,6 +84,15 @@ export default async (req) => {
       } else if (action === 'delete') {
         if (!UUID_RE.test(id)) return json(400, { ok: false, error: 'invalid id' });
         tasks = tasks.filter((task) => task.id !== id);
+      } else if (action === 'reorder') {
+        if (!Array.isArray(order) || !order.every((x) => UUID_RE.test(x))) {
+          return json(400, { ok: false, error: 'invalid order' });
+        }
+        // Reorder to match `order`; any task id not listed keeps its place at the end.
+        const byId = new Map(tasks.map((t) => [t.id, t]));
+        const ranked = order.map((x) => byId.get(x)).filter(Boolean);
+        const seen = new Set(ranked.map((t) => t.id));
+        tasks = [...ranked, ...tasks.filter((t) => !seen.has(t.id))];
       } else {
         return json(400, { ok: false, error: 'invalid action' });
       }
