@@ -66,11 +66,14 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
     openSheet(facility);
   });
 
-  // Touching the map dismisses the search dropdown and the keyboard
+  // Touching the map dismisses the search dropdown, the keyboard, and the task panel
   $('#map').addEventListener('pointerdown', () => {
     hideSearch();
     searchInput.blur();
+    hideTasks();
   }, { passive: true });
+
+  $('#tasks-close').addEventListener('click', hideTasks);
 
   // Filter chips
   $('#chips').addEventListener('click', (e) => {
@@ -281,6 +284,18 @@ export function updateCounts(overrides, total) {
   document.querySelectorAll('.chip').forEach((chip) => {
     chip.querySelector('span').textContent = `(${counts[chip.dataset.filter]})`;
   });
+}
+
+// --- Read-only open-task overlay (full editing lives on /admin) ---
+
+const hideTasks = () => $('#tasks-panel').classList.add('hidden');
+
+export function showTasks(tasks) {
+  const open = (tasks || []).filter((t) => t && !t.done);
+  $('#tasks-list').innerHTML = open.length
+    ? open.map((t) => `<div class="task-row">${escapeHtml(t.text)}</div>`).join('')
+    : '<p class="tasks-empty">Inga öppna uppgifter</p>';
+  $('#tasks-panel').classList.remove('hidden');
 }
 
 let toastTimer;

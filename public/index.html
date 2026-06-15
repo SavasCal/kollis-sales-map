@@ -51,7 +51,17 @@
     </div>
     <div id="kanban" class="kanban hidden"></div>
 
+    <button id="tasks-toggle" class="tasks-btn" title="Uppgifter" aria-label="Visa uppgifter">&#9776;</button>
     <button id="locate" class="locate-btn" title="Visa min position" aria-label="Visa min position">&#x25C9;</button>
+
+    <!-- Read-only open-task overlay (managed on /admin) -->
+    <div id="tasks-panel" class="tasks-panel hidden">
+      <div class="tasks-panel-head">
+        <h2>Uppgifter</h2>
+        <button id="tasks-close" class="sheet-close" aria-label="Stäng">&times;</button>
+      </div>
+      <div id="tasks-list" class="tasks-list"></div>
+    </div>
 
     <!-- Bottom sheet -->
     <div id="sheet" class="sheet">

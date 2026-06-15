@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f2937" />
+  <title>Säljkartan – Admin</title>
+  <link rel="stylesheet" href="/css/app.css" />
+</head>
+<body>
+  <!-- Password gate -->
+  <div id="gate" class="gate hidden">
+    <form id="gate-form" class="gate-card">
+      <h1>Admin</h1>
+      <p>Ange lösenordet för att hantera uppgifter.</p>
+      <input id="gate-password" type="password" placeholder="Lösenord" autocomplete="current-password" required />
+      <button type="submit">Logga in</button>
+      <p id="gate-error" class="gate-error hidden">Fel lösenord, försök igen.</p>
+    </form>
+  </div>
+
+  <main id="admin" class="admin hidden">
+    <h1>Uppgifter</h1>
+    <form id="admin-add" class="admin-add">
+      <input id="admin-text" type="text" placeholder="Ny uppgift…" maxlength="500" autocomplete="off" required />
+      <button type="submit">Lägg till</button>
+    </form>
+    <div id="admin-list"></div>
+  </main>
+
+  <script type="module" src="/admin/admin.js"></script>
+</body>
+</html>

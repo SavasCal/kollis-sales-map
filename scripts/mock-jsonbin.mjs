@@ -2,7 +2,10 @@
 // Implements GET /v3/b/:id/latest and PUT /v3/b/:id with an in-memory record.
 import { createServer } from 'node:http';
 
-let record = { _meta: { v: 1 } };
+// Per-bin-id records so multiple bins (overrides + tasks) don't clobber each other.
+const records = new Map();
+const getRecord = (id) => records.get(id) || { _meta: { v: 1 } };
+const binIdFrom = (url) => url.replace(/^\//, '').split('/')[0];
 let sheetRows = [];
 
 createServer((req, res) => {
@@ -24,11 +27,13 @@ createServer((req, res) => {
       res.writeHead(401).end('{"message":"bad key"}');
       return;
     }
+    const binId = binIdFrom(req.url);
     if (req.method === 'GET' && req.url.endsWith('/latest')) {
       res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify(record));
+      res.end(JSON.stringify(getRecord(binId)));
     } else if (req.method === 'PUT') {
-      record = JSON.parse(Buffer.concat(chunks).toString());
+      const record = JSON.parse(Buffer.concat(chunks).toString());
+      records.set(binId, record);
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ record, metadata: {} }));
     } else {

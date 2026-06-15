@@ -60,6 +60,7 @@ async function boot() {
     });
     $('#locate').addEventListener('click', (e) => mapView.toggleLocate(e.currentTarget));
     $('#kanban-toggle').addEventListener('click', ui.toggleKanban);
+    $('#tasks-toggle').addEventListener('click', openTasks);
     $('#refresh').addEventListener('click', refreshState);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
@@ -71,6 +72,16 @@ async function boot() {
   }
 
   api.flushQueue(applyOverrides);
+}
+
+async function openTasks() {
+  try {
+    const { tasks } = await api.getTasks();
+    ui.showTasks(tasks);
+  } catch (err) {
+    if (err.message === 'unauthorized') return;
+    ui.toast('Kunde inte hämta uppgifter');
+  }
 }
 
 async function refreshState() {

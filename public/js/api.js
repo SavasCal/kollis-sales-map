@@ -7,8 +7,8 @@ export const getPassword = () => localStorage.getItem(PASSWORD_KEY) || '';
 export const setPassword = (pw) => localStorage.setItem(PASSWORD_KEY, pw);
 export const clearPassword = () => localStorage.removeItem(PASSWORD_KEY);
 
-async function request(method, body) {
-  const res = await fetch('/api/state', {
+async function request(method, body, path = '/api/state') {
+  const res = await fetch(path, {
     method,
     headers: {
       'x-app-password': getPassword(),
@@ -28,6 +28,10 @@ async function request(method, body) {
 
 export const getState = () => request('GET');
 export const saveOverride = (payload) => request('POST', payload);
+
+// Shared task list (separate bin via /api/tasks)
+export const getTasks = () => request('GET', null, '/api/tasks');
+export const saveTask = (payload) => request('POST', payload, '/api/tasks');
 
 // ---- Pending-save queue (survives reloads; last write wins per facility) ----
 

@@ -164,6 +164,94 @@ html, body {
 }
 .locate-btn.active { background: var(--accent); color: #fff; }
 
+/* Tasks button: stacked just above the locate circle */
+.tasks-btn {
+  position: fixed;
+  right: 14px;
+  bottom: calc(24px + 48px + 12px + env(safe-area-inset-bottom));
+  z-index: 1050;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: var(--dark);
+  font-size: 22px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+/* Read-only open-task overlay on the map */
+.tasks-panel {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 1900;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -6px 30px rgba(0,0,0,0.3);
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+  max-height: 60dvh;
+  overflow-y: auto;
+}
+.tasks-panel-head { display: flex; align-items: center; justify-content: space-between; }
+.tasks-panel-head h2 { margin: 0; font-size: 18px; }
+.tasks-list { margin-top: 8px; }
+.task-row {
+  padding: 12px 4px;
+  border-bottom: 1px solid #eef0f2;
+  font-size: 15px;
+  color: var(--dark);
+}
+.task-row:last-child { border-bottom: none; }
+.tasks-empty { color: #9ca3af; font-size: 14px; text-align: center; margin: 16px 0; }
+
+/* ---------- Admin task editor (/admin) ---------- */
+.admin {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px calc(24px + env(safe-area-inset-bottom));
+}
+.admin h1 { font-size: 22px; margin: 0 0 16px; }
+.admin-add { display: flex; gap: 8px; margin-bottom: 16px; }
+.admin-add input {
+  flex: 1;
+  font-size: 16px;
+  font-family: inherit;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+.admin-add button {
+  border: none;
+  border-radius: 10px;
+  background: var(--accent, #2563eb);
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.admin-task {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 4px;
+  border-bottom: 1px solid #eef0f2;
+}
+.admin-task input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; }
+.admin-task .admin-task-text { flex: 1; font-size: 15px; color: var(--dark); }
+.admin-task.done .admin-task-text { text-decoration: line-through; color: #9ca3af; }
+.admin-task .admin-del {
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.admin-empty { color: #9ca3af; text-align: center; margin: 24px 0; }
+
 /* ---------- Kanban toggle + board ---------- */
 .kanban-btn {
   position: fixed;
