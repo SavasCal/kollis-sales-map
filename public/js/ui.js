@@ -286,16 +286,25 @@ export function updateCounts(overrides, total) {
   });
 }
 
-// --- Read-only open-task overlay (full editing lives on /admin) ---
+// --- Read-only open-task view: full-page immersive checklist (editing on /admin) ---
 
-const hideTasks = () => $('#tasks-panel').classList.add('hidden');
+// The view covers the whole screen, so hide the floating map buttons while it's up.
+const FLOATING_BTNS = ['#tasks-toggle', '#locate', '#kanban-toggle'];
+const setFloatingHidden = (hidden) =>
+  FLOATING_BTNS.forEach((sel) => $(sel)?.classList.toggle('hidden', hidden));
+
+function hideTasks() {
+  $('#tasks-panel').classList.add('hidden');
+  setFloatingHidden(false);
+}
 
 export function showTasks(tasks) {
   const open = (tasks || []).filter((t) => t && !t.done);
   $('#tasks-list').innerHTML = open.length
     ? open.map((t) => `<div class="task-row">${escapeHtml(t.text)}</div>`).join('')
-    : '<p class="tasks-empty">Inga öppna uppgifter</p>';
+    : '<p class="tasks-empty">Inga öppna uppgifter ✓</p>';
   $('#tasks-panel').classList.remove('hidden');
+  setFloatingHidden(true);
 }
 
 let toastTimer;

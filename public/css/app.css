@@ -181,29 +181,62 @@ html, body {
   cursor: pointer;
 }
 
-/* Read-only open-task overlay on the map */
+/* Read-only open-task view: a full-page immersive checklist over the map */
 .tasks-panel {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  inset: 0;
   z-index: 1900;
-  background: #fff;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -6px 30px rgba(0,0,0,0.3);
-  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
-  max-height: 60dvh;
+  background: var(--dark, #1f2937);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top) + 8px) 0 env(safe-area-inset-bottom);
+}
+.tasks-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px 12px;
+  flex-shrink: 0;
+}
+.tasks-panel-head h2 { margin: 0; font-size: 24px; font-weight: 700; }
+.tasks-panel-head .sheet-close { position: static; color: #fff; font-size: 30px; }
+.tasks-list {
+  flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 16px calc(24px + env(safe-area-inset-bottom));
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
 }
-.tasks-panel-head { display: flex; align-items: center; justify-content: space-between; }
-.tasks-panel-head h2 { margin: 0; font-size: 18px; }
-.tasks-list { margin-top: 8px; }
 .task-row {
-  padding: 12px 4px;
-  border-bottom: 1px solid #eef0f2;
-  font-size: 15px;
-  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 18px;
+  line-height: 1.35;
+  color: #f3f4f6;
 }
-.task-row:last-child { border-bottom: none; }
-.tasks-empty { color: #9ca3af; font-size: 14px; text-align: center; margin: 16px 0; }
+/* Empty checklist box on each open task for the "checklist" feel (read-only) */
+.task-row::before {
+  content: "";
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+}
+.tasks-empty {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  text-align: center;
+  margin: 48px 0;
+}
 
 /* ---------- Admin task editor (/admin) ---------- */
 .admin {
