@@ -65,10 +65,12 @@ export default async (req) => {
       }
       const { action, id = '', text = '' } = body || {};
 
-      const record = await fetchRecord(masterKey);
-      if (!record || typeof record !== 'object' || Array.isArray(record)) {
-        throw new Error('jsonbin GET returned non-object');
-      }
+      // A fresh/manually-seeded bin can hold an array or junk; treat anything
+      // that isn't a usable object as "empty" and start a clean record rather
+      // than 502'ing. The whole tasks array round-trips as one value, so there's
+      // no partial-write risk to guard against here.
+      const raw = await fetchRecord(masterKey);
+      const record = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
       let tasks = tasksOf(record);
 
       if (action === 'add') {
