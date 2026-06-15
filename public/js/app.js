@@ -61,6 +61,8 @@ async function boot() {
     $('#locate').addEventListener('click', (e) => mapView.toggleLocate(e.currentTarget));
     $('#kanban-toggle').addEventListener('click', ui.toggleKanban);
     $('#tasks-toggle').addEventListener('click', openTasks);
+    $('#wishes-toggle').addEventListener('click', openWishes);
+    wireWishes();
     $('#refresh').addEventListener('click', refreshState);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
@@ -82,6 +84,55 @@ async function openTasks() {
     if (err.message === 'unauthorized') return;
     ui.toast('Kunde inte hämta uppgifter');
   }
+}
+
+async function openWishes() {
+  try {
+    const { wishes } = await api.getWishes();
+    ui.showWishes(wishes);
+  } catch (err) {
+    if (err.message === 'unauthorized') return;
+    ui.toast('Kunde inte hämta önskemål');
+  }
+}
+
+// Wire the wishlist add-form + delegated vote/edit/delete once at boot.
+// Each mutation returns the full list, which we re-render in place.
+function wireWishes() {
+  const mutate = async (payload) => {
+    try {
+      const { wishes } = await api.saveWish(payload);
+      ui.showWishes(wishes);
+    } catch (err) {
+      if (err.message === 'unauthorized') return;
+      ui.toast('Kunde inte spara — försök igen');
+    }
+  };
+
+  $('#wishes-add').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = $('#wishes-text');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    mutate({ action: 'add', text });
+  });
+
+  $('#wishes-list').addEventListener('click', (e) => {
+    const row = e.target.closest('.wish-row');
+    if (!row) return;
+    const act = e.target.closest('[data-act]')?.dataset.act;
+    const id = row.dataset.id;
+    if (act === 'vote') mutate({ action: 'vote', id, vote: 1 });
+    else if (act === 'delete') mutate({ action: 'delete', id });
+    else if (act === 'edit') {
+      const current = row.querySelector('.wish-text')?.textContent || '';
+      const text = prompt('Ändra önskemål:', current);
+      if (text == null) return;
+      const t = text.trim();
+      if (t && t !== current) mutate({ action: 'edit', id, text: t });
+    }
+  });
 }
 
 async function refreshState() {

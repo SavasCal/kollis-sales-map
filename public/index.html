@@ -51,6 +51,7 @@
     </div>
     <div id="kanban" class="kanban hidden"></div>
 
+    <button id="wishes-toggle" class="wishes-btn" title="Önskelista" aria-label="Visa önskelista">&#9733;</button>
     <button id="tasks-toggle" class="tasks-btn" title="Uppgifter" aria-label="Visa uppgifter">&#9776;</button>
     <button id="locate" class="locate-btn" title="Visa min position" aria-label="Visa min position">&#x25C9;</button>
 
@@ -61,6 +62,19 @@
         <button id="tasks-close" class="sheet-close" aria-label="Stäng">&times;</button>
       </div>
       <div id="tasks-list" class="tasks-list"></div>
+    </div>
+
+    <!-- Editable wishlist overlay: features we need in the wild (add/edit/delete/upvote) -->
+    <div id="wishes-panel" class="wishes-panel hidden">
+      <div class="tasks-panel-head">
+        <h2>Önskelista</h2>
+        <button id="wishes-close" class="sheet-close" aria-label="Stäng">&times;</button>
+      </div>
+      <form id="wishes-add" class="wishes-add">
+        <input id="wishes-text" type="text" placeholder="Funktion vi behöver i fält…" maxlength="500" autocomplete="off" required />
+        <button type="submit">Lägg till</button>
+      </form>
+      <div id="wishes-list" class="wishes-list"></div>
     </div>
 
     <!-- Bottom sheet -->

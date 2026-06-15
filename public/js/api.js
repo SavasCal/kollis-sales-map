@@ -33,6 +33,10 @@ export const saveOverride = (payload) => request('POST', payload);
 export const getTasks = () => request('GET', null, '/api/tasks');
 export const saveTask = (payload) => request('POST', payload, '/api/tasks');
 
+// Wishlist ("features we need in the wild") — separate bin via /api/wishes
+export const getWishes = () => request('GET', null, '/api/wishes');
+export const saveWish = (payload) => request('POST', payload, '/api/wishes');
+
 // ---- Pending-save queue (survives reloads; last write wins per facility) ----
 
 const readQueue = () => {

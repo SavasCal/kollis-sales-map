@@ -1,9 +1,11 @@
 // Admin task editor: add / toggle / delete tasks in the shared task bin.
 // Password-gated with the same APP_PASSWORD as the map (shared localStorage key).
 import * as api from '/js/api.js';
+import { renderWishRows } from '/js/ui.js';
 
 const $ = (sel) => document.querySelector(sel);
 let tasks = [];
+let wishes = [];
 
 const escapeHtml = (s) =>
   String(s).replace(/[&<>"']/g, (c) =>
@@ -87,11 +89,64 @@ async function load() {
     $('#gate').classList.add('hidden');
     $('#admin').classList.remove('hidden');
     render();
+    loadWishes();
   } catch (err) {
     if (err.message === 'unauthorized') return; // auth-failed event handles the gate
     showGate();
   }
 }
+
+// --- Wishlist (votes are the ranking — no drag-to-reorder) ---
+function renderWishes() {
+  $('#admin-wishes-list').innerHTML = renderWishRows(wishes);
+}
+
+async function loadWishes() {
+  try {
+    const data = await api.getWishes();
+    wishes = data.wishes || [];
+    renderWishes();
+  } catch (err) {
+    if (err.message === 'unauthorized') return;
+    /* leave the section empty; tasks already unlocked the gate */
+  }
+}
+
+async function mutateWish(payload) {
+  try {
+    const data = await api.saveWish(payload);
+    wishes = data.wishes || [];
+    renderWishes();
+  } catch (err) {
+    if (err.message === 'unauthorized') return;
+    alert('Kunde inte spara — försök igen');
+  }
+}
+
+$('#admin-wishes-add').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = $('#admin-wishes-text');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  mutateWish({ action: 'add', text });
+});
+
+$('#admin-wishes-list').addEventListener('click', (e) => {
+  const row = e.target.closest('.wish-row');
+  if (!row) return;
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  const id = row.dataset.id;
+  if (act === 'vote') mutateWish({ action: 'vote', id, vote: 1 });
+  else if (act === 'delete') mutateWish({ action: 'delete', id });
+  else if (act === 'edit') {
+    const current = row.querySelector('.wish-text')?.textContent || '';
+    const text = prompt('Ändra önskemål:', current);
+    if (text == null) return;
+    const t = text.trim();
+    if (t && t !== current) mutateWish({ action: 'edit', id, text: t });
+  }
+});
 
 async function mutate(payload) {
   try {

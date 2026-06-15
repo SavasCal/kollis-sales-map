@@ -182,6 +182,23 @@ html, body {
   cursor: pointer;
 }
 
+/* Wishlist button: stacked just above the tasks circle */
+.wishes-btn {
+  position: fixed;
+  right: 14px;
+  bottom: calc(24px + (48px + 12px) * 2 + env(safe-area-inset-bottom));
+  z-index: 1050;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #fff;
+  color: #f59e0b;
+  font-size: 24px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
 /* Read-only open-task view: a full-page immersive checklist over the map */
 .tasks-panel {
   position: fixed;
@@ -234,6 +251,101 @@ html, body {
   border: 2px solid #cbd1d9;
 }
 .tasks-empty {
+  color: #6b7280;
+  font-size: 16px;
+  text-align: center;
+  margin: 48px 0;
+}
+
+/* Editable wishlist: same immersive overlay as tasks, but with add form + voting rows */
+.wishes-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 1900;
+  background: #e5e7eb;
+  color: var(--dark);
+  display: flex;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top) + 8px) 0 env(safe-area-inset-bottom);
+}
+.wishes-add {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+.wishes-add input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #cbd1d9;
+  border-radius: 10px;
+  font-size: 16px;
+  background: #fff;
+}
+.wishes-add button {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--dark);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.wishes-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 16px calc(24px + env(safe-area-inset-bottom));
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+}
+.wish-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  font-size: 18px;
+  line-height: 1.35;
+}
+.wish-vote {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 44px;
+  padding: 6px 4px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+  color: #f59e0b;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.wish-vote .wish-count { color: var(--dark); font-size: 15px; }
+.wish-text { flex: 1; color: var(--dark); }
+.wish-edit, .wish-del {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  color: #9ca3af;
+  padding: 6px;
+}
+.wish-del { color: #dc2626; font-size: 24px; }
+.wishes-empty {
   color: #6b7280;
   font-size: 16px;
   text-align: center;

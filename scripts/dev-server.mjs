@@ -6,8 +6,13 @@ import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import stateHandler from '../netlify/functions/state.mjs';
 import tasksHandler from '../netlify/functions/tasks.mjs';
+import wishesHandler from '../netlify/functions/wishes.mjs';
 
-const API_HANDLERS = { '/api/state': stateHandler, '/api/tasks': tasksHandler };
+const API_HANDLERS = {
+  '/api/state': stateHandler,
+  '/api/tasks': tasksHandler,
+  '/api/wishes': wishesHandler,
+};
 
 const PUBLIC = new URL('../public', import.meta.url).pathname;
 const MIME = {

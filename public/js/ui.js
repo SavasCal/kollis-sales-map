@@ -74,6 +74,7 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
   }, { passive: true });
 
   $('#tasks-close').addEventListener('click', hideTasks);
+  $('#wishes-close').addEventListener('click', hideWishes);
 
   // Filter chips
   $('#chips').addEventListener('click', (e) => {
@@ -289,7 +290,7 @@ export function updateCounts(overrides, total) {
 // --- Read-only open-task view: full-page immersive checklist (editing on /admin) ---
 
 // The view covers the whole screen, so hide the floating map buttons while it's up.
-const FLOATING_BTNS = ['#tasks-toggle', '#locate', '#kanban-toggle'];
+const FLOATING_BTNS = ['#wishes-toggle', '#tasks-toggle', '#locate', '#kanban-toggle'];
 const setFloatingHidden = (hidden) =>
   FLOATING_BTNS.forEach((sel) => $(sel)?.classList.toggle('hidden', hidden));
 
@@ -305,6 +306,37 @@ export function showTasks(tasks) {
     : '<p class="tasks-empty">Inga öppna uppgifter ✓</p>';
   $('#tasks-panel').classList.remove('hidden');
   setFloatingHidden(true);
+}
+
+// Sort by votes desc, tie-broken by creation time (oldest first), then render
+// editable rows. Shared between the map wishlist panel and the /admin editor.
+export function renderWishRows(wishes) {
+  const sorted = (wishes || [])
+    .filter(Boolean)
+    .slice()
+    .sort((a, b) => (b.votes || 0) - (a.votes || 0) || String(a.t).localeCompare(String(b.t)));
+  if (!sorted.length) return '<p class="wishes-empty">Inga önskemål ännu</p>';
+  return sorted
+    .map(
+      (w) => `<div class="wish-row" data-id="${escapeHtml(w.id)}">
+        <button class="wish-vote" data-act="vote" aria-label="Rösta upp">▲<span class="wish-count">${w.votes || 0}</span></button>
+        <span class="wish-text">${escapeHtml(w.text)}</span>
+        <button class="wish-edit" data-act="edit" aria-label="Ändra">✎</button>
+        <button class="wish-del" data-act="delete" aria-label="Ta bort">&times;</button>
+      </div>`
+    )
+    .join('');
+}
+
+export function showWishes(wishes) {
+  $('#wishes-list').innerHTML = renderWishRows(wishes);
+  $('#wishes-panel').classList.remove('hidden');
+  setFloatingHidden(true);
+}
+
+function hideWishes() {
+  $('#wishes-panel').classList.add('hidden');
+  setFloatingHidden(false);
 }
 
 let toastTimer;
