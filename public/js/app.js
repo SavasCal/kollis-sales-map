@@ -63,6 +63,7 @@ async function boot() {
     $('#tasks-toggle').addEventListener('click', openTasks);
     $('#wishes-toggle').addEventListener('click', openWishes);
     $('#kpis-toggle').addEventListener('click', openKpis);
+    $('#permits-toggle').addEventListener('click', ui.showPermits);
     wireWishes();
     $('#refresh').addEventListener('click', refreshState);
     document.addEventListener('visibilitychange', () => {

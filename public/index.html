@@ -51,6 +51,7 @@
     </div>
     <div id="kanban" class="kanban hidden"></div>
 
+    <button id="permits-toggle" class="permits-btn" title="Nya serveringstillstånd" aria-label="Visa nya serveringstillstånd">&#127869;</button>
     <button id="kpis-toggle" class="kpis-btn" title="Veckomål (KPI)" aria-label="Visa veckomål">&#128202;</button>
     <button id="wishes-toggle" class="wishes-btn" title="Product features" aria-label="Visa product features">&#9733;</button>
     <button id="tasks-toggle" class="tasks-btn" title="Uppgifter" aria-label="Visa uppgifter">&#9776;</button>
@@ -85,6 +86,15 @@
         <button id="kpis-close" class="sheet-close" aria-label="Stäng">&times;</button>
       </div>
       <div id="kpis-list" class="tasks-list"></div>
+    </div>
+
+    <!-- Read-only static list: places that recently got permission to serve food -->
+    <div id="permits-panel" class="tasks-panel hidden">
+      <div class="tasks-panel-head">
+        <h2>Nya serveringstillstånd</h2>
+        <button id="permits-close" class="sheet-close" aria-label="Stäng">&times;</button>
+      </div>
+      <div id="permits-list" class="permits-list"></div>
     </div>
 
     <!-- Bottom sheet -->

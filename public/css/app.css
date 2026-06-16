@@ -216,6 +216,60 @@ html, body {
   cursor: pointer;
 }
 
+/* New serving-permits button: yellow circle, black icon, above the KPI circle */
+.permits-btn {
+  position: fixed;
+  right: 14px;
+  bottom: calc(24px + (48px + 12px) * 4 + env(safe-area-inset-bottom));
+  z-index: 1050;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--yellow);
+  color: var(--dark);
+  font-size: 22px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+/* Read-only serving-permit cards: name + category badge, address/operator, date */
+.permits-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 16px calc(24px + env(safe-area-inset-bottom));
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+}
+.permit-row {
+  padding: 16px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  color: var(--dark);
+}
+.permit-row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.permit-name { font-size: 18px; font-weight: 700; }
+.permit-cat {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dark);
+  background: var(--yellow);
+  border-radius: 999px;
+  padding: 2px 10px;
+  flex-shrink: 0;
+}
+.permit-meta { font-size: 14px; color: #6b7280; margin-top: 6px; line-height: 1.4; }
+.permit-date { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+
 /* Read-only weekly-KPI rows: label, progress bar, current/target */
 .kpi-row {
   padding: 16px;

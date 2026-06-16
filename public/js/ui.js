@@ -76,6 +76,7 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
   $('#tasks-close').addEventListener('click', hideTasks);
   $('#wishes-close').addEventListener('click', hideWishes);
   $('#kpis-close').addEventListener('click', hideKpis);
+  $('#permits-close').addEventListener('click', hidePermits);
 
   // Filter chips
   $('#chips').addEventListener('click', (e) => {
@@ -291,7 +292,7 @@ export function updateCounts(overrides, total) {
 // --- Read-only open-task view: full-page immersive checklist (editing on /admin) ---
 
 // The view covers the whole screen, so hide the floating map buttons while it's up.
-const FLOATING_BTNS = ['#kpis-toggle', '#wishes-toggle', '#tasks-toggle', '#locate', '#kanban-toggle'];
+const FLOATING_BTNS = ['#permits-toggle', '#kpis-toggle', '#wishes-toggle', '#tasks-toggle', '#locate', '#kanban-toggle'];
 const setFloatingHidden = (hidden) =>
   FLOATING_BTNS.forEach((sel) => $(sel)?.classList.toggle('hidden', hidden));
 
@@ -365,6 +366,49 @@ export function showKpis({ week, steps }) {
 
 function hideKpis() {
   $('#kpis-panel').classList.add('hidden');
+  setFloatingHidden(false);
+}
+
+// --- Read-only static list: places that recently got permission to serve food ---
+
+const PERMITS = [
+  { date: '2026-06-12', name: 'Chiesi Pharma AB', cat: 'Kosttillskott', addr: 'Klara norra kyrkogata 34, Stockholm', op: 'Chiesi Pharma AB (556827-5746)' },
+  { date: '2026-06-12', name: 'Halwa.', cat: 'Tillverkning', addr: 'Nybykroken 13, Spånga', op: 'Fagar AB (559103-3559)' },
+  { date: '2026-06-10', name: 'BoCenter, Högbergsgatan', cat: 'Vård/omsorg', addr: 'Högbergsgatan 20, Nacka', op: 'Stockholm Stadsmission (802003-1954)' },
+  { date: '2026-06-08', name: 'Dig in', cat: 'Restaurang' },
+  { date: '2026-06-08', name: 'Hoi Polloi', cat: 'Restaurang' },
+  { date: '2026-06-08', name: 'Lepicerie Fine', cat: 'Butik' },
+  { date: '2026-06-08', name: 'Kruthuset', cat: 'Restaurang', addr: 'Hunduddsvägen 57, Stockholm', op: 'Gyllenstierna Mat & Media AB (556311-5442)' },
+  { date: '2026-06-05', name: 'Swedish Temptations AB', cat: 'Matmäklare', addr: 'Torsgatan 57, Stockholm', op: 'Swedish Temptations AB (559008-4231)' },
+  { date: '2026-06-05', name: 'TRAN Coffee Lab, mobil', cat: 'Café', addr: '(mobil), Stockholm', op: 'Systrarna TRAN AB (559587-6037)' },
+  { date: '2026-06-04', name: 'Nova Classics', cat: 'Grossist', addr: 'Götgatan 35A, Stockholm', op: 'Nova Classics AB (559572-7198)' },
+  { date: '2026-06-03', name: 'Kista Äng Gruppbostad', cat: 'Vård/omsorg', addr: 'Borgarfjordsgatan 2C, Spånga', op: 'Stadsdelsnämnd Järva (212000-0142)' },
+  { date: '2026-06-03', name: 'Pressbyrån 4250180', cat: 'Kiosk', addr: 'Drottninggatan 65, Stockholm', op: 'Hura Servicehandel AB (559421-0709)' },
+  { date: '2026-06-03', name: 'Skruf', cat: 'Huvudkontor', addr: 'Tulegatan 15, Stockholm', op: 'Skruf Snus AB (556626-9196)' },
+  { date: '2026-06-02', name: 'Nutraframe.', cat: 'Kosttillskott', addr: 'Torsgatan 27, Stockholm', op: 'Nutraframe AB (559567-1503)' },
+  { date: '2026-06-02', name: 'Pizza Jedi', cat: 'Snabbmatsrestaurang', addr: 'Enskede', op: 'Kakelfixarna Stockholm AB (559270-4430)' },
+  { date: '2026-06-01', name: 'Kronopartner Stockholm HB', cat: 'Restaurang', addr: 'Tullinge', op: 'Kronopartner Stockholm HB (969762-7470)' },
+  { date: '2026-06-01', name: 'Nordic Multserving', cat: 'Restaurang', addr: 'Karl XII:s torg 5, Tullinge', op: 'Nordic Multserving AB (559432-9814)' },
+];
+
+export function showPermits() {
+  $('#permits-list').innerHTML = PERMITS.map((p) => {
+    const meta = [p.addr, p.op].filter(Boolean).map(escapeHtml).join('<br>');
+    return `<div class="permit-row">
+      <div class="permit-row-head">
+        <span class="permit-name">${escapeHtml(p.name)}</span>
+        <span class="permit-cat">${escapeHtml(p.cat)}</span>
+      </div>
+      ${meta ? `<div class="permit-meta">${meta}</div>` : ''}
+      <div class="permit-date">Tillstånd: ${escapeHtml(p.date)}</div>
+    </div>`;
+  }).join('');
+  $('#permits-panel').classList.remove('hidden');
+  setFloatingHidden(true);
+}
+
+function hidePermits() {
+  $('#permits-panel').classList.add('hidden');
   setFloatingHidden(false);
 }
 
