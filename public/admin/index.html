@@ -33,6 +33,18 @@
       <button type="submit">Lägg till</button>
     </form>
     <div id="admin-wishes-list" class="wishes-list"></div>
+
+    <h1>KPI (veckomål)</h1>
+    <form id="admin-kpi-week" class="admin-kpi-week">
+      <input id="admin-kpi-week-input" type="text" placeholder="Vecka, t.ex. W26" maxlength="16" autocomplete="off" />
+      <button type="submit">Spara vecka</button>
+    </form>
+    <form id="admin-kpi-add" class="admin-add">
+      <input id="admin-kpi-label" type="text" placeholder="Steg, t.ex. Kontakt…" maxlength="40" autocomplete="off" required />
+      <input id="admin-kpi-target" type="number" min="0" placeholder="Mål" inputmode="numeric" required />
+      <button type="submit">Lägg till</button>
+    </form>
+    <div id="admin-kpi-list"></div>
   </main>
 
   <script type="module" src="/admin/admin.js"></script>

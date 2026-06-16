@@ -62,6 +62,7 @@ async function boot() {
     $('#kanban-toggle').addEventListener('click', ui.toggleKanban);
     $('#tasks-toggle').addEventListener('click', openTasks);
     $('#wishes-toggle').addEventListener('click', openWishes);
+    $('#kpis-toggle').addEventListener('click', openKpis);
     wireWishes();
     $('#refresh').addEventListener('click', refreshState);
     document.addEventListener('visibilitychange', () => {
@@ -93,6 +94,16 @@ async function openWishes() {
   } catch (err) {
     if (err.message === 'unauthorized') return;
     ui.toast('Kunde inte hämta önskemål');
+  }
+}
+
+async function openKpis() {
+  try {
+    const { week, steps } = await api.getKpis();
+    ui.showKpis({ week, steps });
+  } catch (err) {
+    if (err.message === 'unauthorized') return;
+    ui.toast('Kunde inte hämta veckomål');
   }
 }
 

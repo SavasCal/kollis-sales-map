@@ -37,6 +37,10 @@ export const saveTask = (payload) => request('POST', payload, '/api/tasks');
 export const getWishes = () => request('GET', null, '/api/wishes');
 export const saveWish = (payload) => request('POST', payload, '/api/wishes');
 
+// KPI / weekly targets — separate bin via /api/kpis
+export const getKpis = () => request('GET', null, '/api/kpis');
+export const saveKpi = (payload) => request('POST', payload, '/api/kpis');
+
 // ---- Pending-save queue (survives reloads; last write wins per facility) ----
 
 const readQueue = () => {

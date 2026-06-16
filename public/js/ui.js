@@ -75,6 +75,7 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
 
   $('#tasks-close').addEventListener('click', hideTasks);
   $('#wishes-close').addEventListener('click', hideWishes);
+  $('#kpis-close').addEventListener('click', hideKpis);
 
   // Filter chips
   $('#chips').addEventListener('click', (e) => {
@@ -290,7 +291,7 @@ export function updateCounts(overrides, total) {
 // --- Read-only open-task view: full-page immersive checklist (editing on /admin) ---
 
 // The view covers the whole screen, so hide the floating map buttons while it's up.
-const FLOATING_BTNS = ['#wishes-toggle', '#tasks-toggle', '#locate', '#kanban-toggle'];
+const FLOATING_BTNS = ['#kpis-toggle', '#wishes-toggle', '#tasks-toggle', '#locate', '#kanban-toggle'];
 const setFloatingHidden = (hidden) =>
   FLOATING_BTNS.forEach((sel) => $(sel)?.classList.toggle('hidden', hidden));
 
@@ -336,6 +337,34 @@ export function showWishes(wishes) {
 
 function hideWishes() {
   $('#wishes-panel').classList.add('hidden');
+  setFloatingHidden(false);
+}
+
+// --- Read-only weekly KPI view: one progress bar per step (editing on /admin) ---
+
+export function showKpis({ week, steps }) {
+  $('#kpis-week').textContent = (week || '').trim() || 'Veckomål';
+  const list = (steps || []).filter(Boolean);
+  $('#kpis-list').innerHTML = list.length
+    ? list.map((s) => {
+        const target = Number(s.target) || 0;
+        const current = Number(s.current) || 0;
+        const pct = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+        return `<div class="kpi-row">
+          <div class="kpi-row-head">
+            <span class="kpi-label">${escapeHtml(s.label)}</span>
+            <span class="kpi-nums">${current} / ${target}<span class="kpi-pct">${pct}%</span></span>
+          </div>
+          <div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('')
+    : '<p class="kpis-empty">Inga veckomål satta</p>';
+  $('#kpis-panel').classList.remove('hidden');
+  setFloatingHidden(true);
+}
+
+function hideKpis() {
+  $('#kpis-panel').classList.add('hidden');
   setFloatingHidden(false);
 }
 

@@ -51,6 +51,7 @@
     </div>
     <div id="kanban" class="kanban hidden"></div>
 
+    <button id="kpis-toggle" class="kpis-btn" title="Veckomål (KPI)" aria-label="Visa veckomål">&#128202;</button>
     <button id="wishes-toggle" class="wishes-btn" title="Önskelista" aria-label="Visa önskelista">&#9733;</button>
     <button id="tasks-toggle" class="tasks-btn" title="Uppgifter" aria-label="Visa uppgifter">&#9776;</button>
     <button id="locate" class="locate-btn" title="Visa min position" aria-label="Visa min position">&#x25C9;</button>
@@ -75,6 +76,15 @@
         <button type="submit">Lägg till</button>
       </form>
       <div id="wishes-list" class="wishes-list"></div>
+    </div>
+
+    <!-- Read-only weekly KPI overlay (targets managed on /admin) -->
+    <div id="kpis-panel" class="tasks-panel hidden">
+      <div class="tasks-panel-head">
+        <h2 id="kpis-week">Veckomål</h2>
+        <button id="kpis-close" class="sheet-close" aria-label="Stäng">&times;</button>
+      </div>
+      <div id="kpis-list" class="tasks-list"></div>
     </div>
 
     <!-- Bottom sheet -->

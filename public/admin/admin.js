@@ -6,6 +6,7 @@ import { renderWishRows } from '/js/ui.js';
 const $ = (sel) => document.querySelector(sel);
 let tasks = [];
 let wishes = [];
+let kpiSteps = [];
 
 const escapeHtml = (s) =>
   String(s).replace(/[&<>"']/g, (c) =>
@@ -90,6 +91,7 @@ async function load() {
     $('#admin').classList.remove('hidden');
     render();
     loadWishes();
+    loadKpis();
   } catch (err) {
     if (err.message === 'unauthorized') return; // auth-failed event handles the gate
     showGate();
@@ -146,6 +148,84 @@ $('#admin-wishes-list').addEventListener('click', (e) => {
     const t = text.trim();
     if (t && t !== current) mutateWish({ action: 'edit', id, text: t });
   }
+});
+
+// --- KPI / weekly targets (single week, editable step list) ---
+function renderKpis() {
+  const list = $('#admin-kpi-list');
+  if (!kpiSteps.length) {
+    list.innerHTML = '<p class="admin-empty">Inga steg ännu</p>';
+    return;
+  }
+  list.innerHTML = kpiSteps
+    .map(
+      (s) => `<div class="admin-kpi" data-id="${escapeHtml(s.id)}">
+        <input class="admin-kpi-label" data-field="label" value="${escapeHtml(s.label)}" maxlength="40" />
+        <input class="admin-kpi-num" data-field="current" type="number" min="0" inputmode="numeric" value="${Number(s.current) || 0}" />
+        <span class="admin-kpi-sep">/</span>
+        <input class="admin-kpi-num" data-field="target" type="number" min="0" inputmode="numeric" value="${Number(s.target) || 0}" />
+        <button class="admin-del" data-act="delete" aria-label="Ta bort">&times;</button>
+      </div>`
+    )
+    .join('');
+}
+
+async function loadKpis() {
+  try {
+    const data = await api.getKpis();
+    kpiSteps = data.steps || [];
+    $('#admin-kpi-week-input').value = data.week || '';
+    renderKpis();
+  } catch (err) {
+    if (err.message === 'unauthorized') return;
+    /* leave the section empty; tasks already unlocked the gate */
+  }
+}
+
+async function mutateKpi(payload) {
+  try {
+    const data = await api.saveKpi(payload);
+    kpiSteps = data.steps || [];
+    $('#admin-kpi-week-input').value = data.week || '';
+    renderKpis();
+  } catch (err) {
+    if (err.message === 'unauthorized') return;
+    alert('Kunde inte spara — försök igen');
+  }
+}
+
+$('#admin-kpi-week').addEventListener('submit', (e) => {
+  e.preventDefault();
+  mutateKpi({ action: 'set-week', week: $('#admin-kpi-week-input').value.trim() });
+});
+
+$('#admin-kpi-add').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const label = $('#admin-kpi-label').value.trim();
+  const target = $('#admin-kpi-target').value;
+  if (!label || target === '') return;
+  $('#admin-kpi-label').value = '';
+  $('#admin-kpi-target').value = '';
+  mutateKpi({ action: 'add-step', label, target: Number(target) });
+});
+
+// Save edited label/current/target on blur or change (event delegation)
+$('#admin-kpi-list').addEventListener('change', (e) => {
+  const input = e.target.closest('[data-field]');
+  if (!input) return;
+  const row = input.closest('.admin-kpi');
+  const id = row?.dataset.id;
+  if (!id) return;
+  const field = input.dataset.field;
+  const value = field === 'label' ? input.value.trim() : Number(input.value);
+  if (field === 'label' && !value) { renderKpis(); return; } // reject empty label
+  mutateKpi({ action: 'edit-step', id, [field]: value });
+});
+
+$('#admin-kpi-list').addEventListener('click', (e) => {
+  if (e.target.dataset.act !== 'delete') return;
+  const id = e.target.closest('.admin-kpi')?.dataset.id;
+  if (id) mutateKpi({ action: 'delete-step', id });
 });
 
 async function mutate(payload) {
