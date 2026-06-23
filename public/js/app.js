@@ -64,6 +64,8 @@ async function boot() {
     $('#wishes-toggle').addEventListener('click', openWishes);
     $('#kpis-toggle').addEventListener('click', openKpis);
     $('#permits-toggle').addEventListener('click', ui.showPermits);
+    $('#leads-toggle').addEventListener('click', openLeads);
+    wireLeads();
     wireWishes();
     $('#refresh').addEventListener('click', refreshState);
     document.addEventListener('visibilitychange', () => {
@@ -106,6 +108,32 @@ async function openKpis() {
     if (err.message === 'unauthorized') return;
     ui.toast('Kunde inte hämta veckomål');
   }
+}
+
+async function openLeads() {
+  try {
+    const { done } = await api.getLeads();
+    ui.showLeads(done);
+  } catch (err) {
+    if (err.message === 'unauthorized') return;
+    ui.toast('Kunde inte hämta leads');
+  }
+}
+
+// Delegated check-off on the leads list: toggle persists to its bin; the
+// returned done-set is the source of truth we re-render from.
+function wireLeads() {
+  $('#leads-list').addEventListener('click', async (e) => {
+    const row = e.target.closest('.lead-row[data-key]');
+    if (!row) return;
+    try {
+      const { done } = await api.toggleLead(row.dataset.key);
+      ui.showLeads(done);
+    } catch (err) {
+      if (err.message === 'unauthorized') return;
+      ui.toast('Kunde inte spara — försök igen');
+    }
+  });
 }
 
 // Wire the wishlist add-form + delegated vote/edit/delete once at boot.

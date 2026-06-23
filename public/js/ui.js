@@ -77,6 +77,7 @@ export function initUI(facilities, overrideGetter, saveHandler, { onFilter, onFo
   $('#wishes-close').addEventListener('click', hideWishes);
   $('#kpis-close').addEventListener('click', hideKpis);
   $('#permits-close').addEventListener('click', hidePermits);
+  $('#leads-close').addEventListener('click', hideLeads);
 
   // Filter chips
   $('#chips').addEventListener('click', (e) => {
@@ -292,7 +293,7 @@ export function updateCounts(overrides, total) {
 // --- Read-only open-task view: full-page immersive checklist (editing on /admin) ---
 
 // The view covers the whole screen, so hide the floating map buttons while it's up.
-const FLOATING_BTNS = ['#permits-toggle', '#kpis-toggle', '#wishes-toggle', '#tasks-toggle', '#locate', '#kanban-toggle'];
+const FLOATING_BTNS = ['#leads-toggle', '#permits-toggle', '#kpis-toggle', '#wishes-toggle', '#tasks-toggle', '#locate', '#kanban-toggle'];
 const setFloatingHidden = (hidden) =>
   FLOATING_BTNS.forEach((sel) => $(sel)?.classList.toggle('hidden', hidden));
 
@@ -409,6 +410,152 @@ export function showPermits() {
 
 function hidePermits() {
   $('#permits-panel').classList.add('hidden');
+  setFloatingHidden(false);
+}
+
+// --- Read-only static list: restaurant-owner leads grouped by likely heritage ---
+
+// [person, confidence, company, city, turnover (KSEK; '–' = unknown)]
+const LEAD_GROUPS = [
+  {
+    title: '🟡🟢🔴 Turkish (55)',
+    rows: [
+      ['Okan Uludag', 0.93, 'HS Kök Stockholm AB', 'Farsta', '3 000–4 999'],
+      ['Eray Tümtürk', 0.93, 'Brödernas cafe&bageri AB', 'Skarpnäck', '1 000–1 499'],
+      ['Mehmet Gökcek', 0.93, 'Fika Time AB', 'Sundbyberg', '–'],
+      ['Mehmet Ali Simsek', 0.93, 'Plexia Invest AB', 'Stockholm', '3 000–4 999'],
+      ['Metin Kavakli', 0.92, 'Ankara Kebab AB', 'Stockholm', '5 000–9 999'],
+      ['Yilmaz Kerpic', 0.92, 'Ask kebab AB', 'Årsta', '3 000–4 999'],
+      ['Filiz Yazici', 0.92, 'Far East Food AB', 'Årsta', '50 000–99 999'],
+      ['Özcan Sürer', 0.92, 'Rest. Axela AB', 'Stockholm', '20 000–49 999'],
+      ['Nilgün Karayel', 0.92, 'Packgross i Stockholm AB', 'Stockholm', '5 000–9 999'],
+      ['Eren Öztabak', 0.92, 'Dev-Ber Servicehandel AB', 'Stockholm', '10 000–19 999'],
+      ['Fatih Demir', 0.92, 'Stora T HB', 'Stockholm', '10 000–19 999'],
+      ['Yasin Yilmaz', 0.92, 'TLH Strand AB', 'Stockholm', '5 000–9 999'],
+      ['Ertan Görgülü', 0.92, 'Serkans Gatukök AB', 'Stockholm', '1 500–2 999'],
+      ['Volkan Kücük', 0.92, 'Åker Pizzeria AB', 'Hässelby', '10 000–19 999'],
+      ['Imdat Ucak', 0.90, 'Suomen Tavaraclearing AB', 'Hägersten', '10 000–19 999'],
+      ['Osman Cetin', 0.90, 'CK Ersta HB', 'Stockholm', '5 000–9 999'],
+      ['Mustafa Erdinc Kalkan', 0.90, 'Efelund AB', 'Hägersten', '700–999'],
+      ['Ergin Kaya', 0.90, 'Erees pizzeria AB', 'Farsta', '700–999'],
+      ['Ebru Deniz Kuzey', 0.90, 'Fresta Sweets & Nuts AB', 'Sollentuna', '500–699'],
+      ['Mevlüt Ekinci', 0.90, 'MA Hötorget AB', 'Vega', '500–699'],
+      ['Erdal Eker', 0.90, 'Jacks Burger Södermalm AB', 'Stockholm', '1 500–2 999'],
+      ['Osman Uyanik', 0.90, 'Rest. Pepe Nero i Årstadal AB', 'Stockholm', '5 000–9 999'],
+      ['Ercan Coksürer', 0.90, 'CSR Pizzeria AB', 'Stockholm', '5 000–9 999'],
+      ['Battal Gazi Ayhan', 0.90, 'Pizzeria NM HB', 'Stockholm', '3 000–4 999'],
+      ['Hacer Sule Erzurum', 0.90, 'ICV Restaurang HB', 'Upplands Väsby', '5 000–9 999'],
+      ['Can Karademir', 0.90, 'Esperia på Södermalm AB', 'Stockholm', '20 000–49 999'],
+      ['Ramazan Topak', 0.90, 'Rest. Glada Hörnan HB', 'Hägersten', '3 000–4 999'],
+      ['Suat Kaya', 0.90, 'HBR sjöbris AB', 'Stockholm', '–'],
+      ['Ersin Akan', 0.90, 'Stuvsta Pizzeria … Smashburger AB', 'Huddinge', '10 000–19 999'],
+      ['Sahin Akbuga', 0.90, 'H. M. Demirel & Co HB', 'Norsborg', '300–499'],
+      ['Özay Güven', 0.90, 'Dolan Co AB', 'Stockholm', '1 500–2 999'],
+      ['Nevzat Mermer', 0.90, '2 Killar AB', 'Stockholm', '10 000–19 999'],
+      ['Ferit Varli', 0.88, 'Frescati Stories AB', 'Södertälje', '3 000–4 999'],
+      ['Ismail Kececi', 0.88, 'Ragnar Kök & Bar AB', 'Stockholm', '1 500–2 999'],
+      ['Bekir Kalkan', 0.88, 'Rest. Söder Gruvan HB', 'Stockholm', '1 500–2 999'],
+      ['Osman Sari', 0.85, 'Yilmaz & Co KB', 'Skärholmen', '3 000–4 999'],
+      ['Mahmut Suvakci', 0.85, 'Snurrar AB', 'Stockholm', '5 000–9 999'],
+      ['Ahmed Serhat Günes', 0.85, 'Gunes Godishuset AB', 'Järfälla', '1 000–1 499'],
+      ['Suleyman Aslan', 0.85, 'Grill 77', 'Stockholm', '1 000–1 499'],
+      ['Fuat Üre', 0.85, 'Kebabhak STHLM AB', 'Stockholm', '–'],
+      ['Mahmut Suvakci', 0.85, 'Frudam AB', 'Stockholm', '5 000–9 999'],
+      ['Hasan Celep', 0.85, 'Recenita AB', 'Stockholm', '< 1'],
+      ['Battal Tirpan', 0.85, 'Nya Piccola Rosa AB', 'Hässelby', '5 000–9 999'],
+      ['Adnan Aydilek', 0.85, 'Folkunga Pizzeria HB', 'Stockholm', '5 000–9 999'],
+      ['Meliha Kaya', 0.85, 'Samavati Förskolor AB', 'Kista', '–'],
+      ['Sefer Erdal', 0.85, 'Elissa AB', 'Stockholm', '5 000–9 999'],
+      ['Mehmet Salih Tekbas', 0.85, 'R.Tekbas AB', 'Vårby', '< 1'],
+      ['Semire Deniz', 0.85, 'Bron Restaurang & Bar AB', 'Södertälje', '10 000–19 999'],
+      ['Hasan Celep', 0.85, 'Devdel & Dema AB', 'Enskededalen', '5 000–9 999'],
+      ['Ibrahim Ekici', 0.85, 'Ekici & partner AB', 'Johanneshov', '3 000–4 999'],
+      ['Semire Deniz', 0.85, 'Thaipas Stockholm AB', 'Stockholm', '500–699'],
+      ['Hakan Baran', 0.85, 'Elanur Grill', 'Johanneshov', '1 000–1 499'],
+      ['Ebul Muhsin Andic', 0.80, 'Söder Haket AB', 'Enskededalen', '5 000–9 999'],
+      ['Chico Halis Köprücü', 0.80, 'Älvsjö Bar & Kök AB', 'Älvsjö', '< 1'],
+      ['Edison Altinisik', 0.75, 'Hanks Heaven AB', 'Södertälje', '5 000–9 999'],
+    ],
+  },
+  {
+    title: '🟡🟢🔴 Kurdish (11)',
+    rows: [
+      ['Ako Sardar Rahim', 0.85, 'ARtraining AB', 'Bromma', '1 000–1 499'],
+      ['Karwan Mohammad Abubakir', 0.85, 'N FOOD AB', 'Skärholmen', '1–49'],
+      ['Heza Zangana', 0.85, 'Spånga Direkt AB', 'Järfälla', '700–999'],
+      ['Amanj Sardar Baban', 0.85, 'ABSB Solutions AB', 'Stockholm', '5 000–9 999'],
+      ['Zana Shero Jamil', 0.80, 'Tropique AB', 'Bandhagen', '10 000–19 999'],
+      ['Karezo Kamalla', 0.70, 'Apotek A AB', 'Kista', '5 000–9 999'],
+      ['Ronak Khaledi', 0.70, 'D&D Services AB', 'Upplands Väsby', '1 500–2 999'],
+      ['Fatah Toffik Arif', 0.70, 'Apopharmacy AB', 'Hässelby', '1–49'],
+      ['Awesta Ali Karem', 0.70, 'Munching Baby AB', 'Hässelby', '–'],
+      ['Fawzi Ramzi Bapir Bapir', 0.65, 'antwan HB', 'Vällingby', '3 000–4 999'],
+      ['Nuha Qardagh Boya Askar', 0.65, 'RL Restaurang Salar AB', 'Vällingby', '< 1'],
+    ],
+  },
+  {
+    title: '⚪ Turkish-or-Kurdish — ambiguous (29)',
+    rows: [
+      ['Hampus Heval Sune Kjellgren Can', 0.70, 'Ranel Lionel Restaurang AB', 'Vällingby', '5 000–9 999'],
+      ['Jan Can Erdogan Filruzi', 0.70, 'J A F Livs AB', 'Stockholm', '20 000–49 999'],
+      ['Tekosin Akman', 0.70, 'Polena Rederi AB', 'Farsta', '10 000–19 999'],
+      ['Sefkan Robin Aygün', 0.70, 'Björn Ståhlberg AB', 'Stockholm', '3 000–4 999'],
+      ['Ihsan Arikan', 0.65, 'Ruccola Bromma AB', 'Bromma', '10 000–19 999'],
+      ['Kadir Brazer Bozlak', 0.65, 'Spanjoren Slussen AB', 'Borlänge', '< 1'],
+      ['Asir Cigel', 0.60, 'Allé grillen i Rinkeby HB', 'Spånga', '1 500–2 999'],
+      ['Gabriel Daniel Johannes Aydin', 0.60, 'Babas burger and bites sweden 2 AB', 'Södertälje', '100 000–499 999'],
+      ['Mustafa Sik', 0.60, 'DC Restaurang AB', 'Farsta', '5 000–9 999'],
+      ['Samir Ökmen', 0.60, 'Bärasken AB', 'Solna', '5 000–9 999'],
+      ['Helin Sofia M Celik Gunnarsson', 0.60, 'Lilla Smash AB', 'Stockholm', '1 500–2 999'],
+      ['Isak Cansu', 0.60, 'Spisa Pizza Hammarby Sjöstad AB', 'Södertälje', '3 000–4 999'],
+      ['Moses Musa Isik', 0.60, 'Scandinavia Hotell AB', 'Stockholm', '3 000–4 999'],
+      ['Danijel Simon Güven', 0.55, 'Bibon AB', 'Stockholm', '–'],
+      ['Aynur Halef', 0.55, 'Lussins Konditori & Bageri HB', 'Hägersten', '1 500–2 999'],
+      ['Mickael Elia André Yilmaz', 0.55, 'Degkransen AB', 'Hägersten', '700–999'],
+      ['Josua Güven', 0.55, 'Villa Romana Odenplan AB', 'Stockholm', '5 000–9 999'],
+      ['Reza Albazi', 0.50, 'Albazi Quality AB', 'Kista', '–'],
+      ['Antonio Aksu', 0.50, 'ICHIRO AB', 'Stockholm', '–'],
+      ['Ismail Koje', 0.50, 'AL MAMA AB', 'Vällingby', '700–999'],
+      ['Nadir Halef', 0.50, 'LB Gruppen AB', 'Stockholm', '10 000–19 999'],
+      ['Özgur Josef Adayson', 0.50, 'SK Farsta 2 AB', 'Farsta', '< 1'],
+      ['Sergon Kristian Can', 0.50, 'V Grillen AB', 'Järfälla', '3 000–4 999'],
+      ['Marcel Gabriel Mirza', 0.45, 'Axmara AB', 'Stockholm', '–'],
+      ['Sinan Jabar Tomma', 0.45, 'Beirut Lounge AB', 'Skärholmen', '–'],
+      ['Allan Yari', 0.45, 'Paramount Property Management AB', 'Sollentuna', '–'],
+      ['Janilgan Bayan', 0.45, 'TelTen AB', 'Stockholm', '3 000–4 999'],
+      ['Rasmus … Ghambary Ek', 0.40, 'Baggio söder AB', 'Stockholm', '–'],
+      ['Ninos Izgin', 0.40, 'Ninos fastfood AB', 'Södertälje', '–'],
+    ],
+  },
+];
+
+// Stable per-lead key for check-off state (person + company is unique enough here).
+const leadKey = (person, company) => `${person}␟${company}`;
+
+// `done` is the array of checked-off lead keys from /api/leads.
+export function showLeads(done = []) {
+  const doneSet = new Set(done);
+  $('#leads-list').innerHTML = LEAD_GROUPS.flatMap((g) => g.rows)
+    .map(([person, conf, company, city, turnover]) => {
+      const meta = [city, turnover && turnover !== '–' ? `${turnover} KSEK` : null]
+        .filter(Boolean).map(escapeHtml).join(' · ');
+      const key = leadKey(person, company);
+      const checked = doneSet.has(key);
+      return `<div class="lead-row${checked ? ' done' : ''}" data-key="${escapeHtml(key)}">
+        <span class="lead-check" aria-hidden="true">${checked ? '✓' : ''}</span>
+        <div class="lead-body">
+          <div class="lead-name">${escapeHtml(person)}</div>
+          <div class="lead-company">${escapeHtml(company)}</div>
+          ${meta ? `<div class="lead-meta">${meta}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  $('#leads-panel').classList.remove('hidden');
+  setFloatingHidden(true);
+}
+
+function hideLeads() {
+  $('#leads-panel').classList.add('hidden');
   setFloatingHidden(false);
 }
 

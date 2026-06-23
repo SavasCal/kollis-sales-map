@@ -41,6 +41,10 @@ export const saveWish = (payload) => request('POST', payload, '/api/wishes');
 export const getKpis = () => request('GET', null, '/api/kpis');
 export const saveKpi = (payload) => request('POST', payload, '/api/kpis');
 
+// Leads check-off state — separate bin via /api/leads (stores done keys only)
+export const getLeads = () => request('GET', null, '/api/leads');
+export const toggleLead = (key) => request('POST', { action: 'toggle', key }, '/api/leads');
+
 // ---- Pending-save queue (survives reloads; last write wins per facility) ----
 
 const readQueue = () => {
